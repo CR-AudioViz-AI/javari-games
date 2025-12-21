@@ -4,367 +4,283 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 
 // =============================================================================
-// CR AUDIOVIZ AI - GAMES HUB
+// CR AUDIOVIZ AI - PROFESSIONAL GAMES HUB
 // 100 Games: 10 Categories × 10 Games Each
-// Plus External Gaming Resources
+// Features: Real graphics, professional gameplay, external resources
 // =============================================================================
 
-// Game Categories with 10 games each
-const GAME_CATEGORIES = [
-  {
-    id: 'action',
-    name: 'Action/Arcade',
-    icon: '🎯',
-    color: 'from-red-600 to-orange-500',
-    description: 'Fast reflexes, retro-modern gameplay',
-    games: [
-      { id: 'space-shooter', name: 'Space Shooter', difficulty: 1, icon: '🚀' },
-      { id: 'brick-breaker', name: 'Brick Breaker', difficulty: 2, icon: '🧱' },
-      { id: 'asteroid-dodge', name: 'Asteroid Dodge', difficulty: 3, icon: '☄️' },
-      { id: 'ninja-jump', name: 'Ninja Jump', difficulty: 4, icon: '🥷' },
-      { id: 'speed-racer', name: 'Speed Racer', difficulty: 5, icon: '🏎️' },
-      { id: 'zombie-wave', name: 'Zombie Wave', difficulty: 6, icon: '🧟' },
-      { id: 'boss-rush', name: 'Boss Rush', difficulty: 7, icon: '👹' },
-      { id: 'bullet-hell', name: 'Bullet Hell', difficulty: 8, icon: '💥' },
-      { id: 'combo-master', name: 'Combo Master', difficulty: 9, icon: '⚡' },
-      { id: 'ultimate-arcade', name: 'Ultimate Arcade', difficulty: 10, icon: '🏆' },
-    ]
-  },
-  {
-    id: 'strategy',
-    name: 'Strategy/Tactical',
-    icon: '♟️',
-    color: 'from-blue-600 to-indigo-500',
-    description: 'Chess-like, tower defense, planning',
-    games: [
-      { id: 'tower-defense-basic', name: 'Tower Defense', difficulty: 1, icon: '🏰' },
-      { id: 'chess-lite', name: 'Chess Lite', difficulty: 2, icon: '♔' },
-      { id: 'resource-manager', name: 'Resource Manager', difficulty: 3, icon: '📊' },
-      { id: 'battle-tactics', name: 'Battle Tactics', difficulty: 4, icon: '⚔️' },
-      { id: 'kingdom-builder', name: 'Kingdom Builder', difficulty: 5, icon: '👑' },
-      { id: 'war-commander', name: 'War Commander', difficulty: 6, icon: '🎖️' },
-      { id: 'hex-conquest', name: 'Hex Conquest', difficulty: 7, icon: '⬡' },
-      { id: 'empire-master', name: 'Empire Master', difficulty: 8, icon: '🌍' },
-      { id: 'grand-strategy', name: 'Grand Strategy', difficulty: 9, icon: '📜' },
-      { id: 'ultimate-tactics', name: 'Ultimate Tactics', difficulty: 10, icon: '🧠' },
-    ]
-  },
-  {
-    id: 'puzzle',
-    name: 'Puzzle/Brain',
-    icon: '🧩',
-    color: 'from-purple-600 to-pink-500',
-    description: 'Logic, matching, escape rooms',
-    games: [
-      { id: 'match-3', name: 'Match 3', difficulty: 1, icon: '💎' },
-      { id: 'sliding-puzzle', name: 'Sliding Puzzle', difficulty: 2, icon: '🔢' },
-      { id: 'word-search', name: 'Word Search', difficulty: 3, icon: '🔤' },
-      { id: 'sudoku', name: 'Sudoku', difficulty: 4, icon: '9️⃣' },
-      { id: 'logic-gates', name: 'Logic Gates', difficulty: 5, icon: '🔌' },
-      { id: 'escape-room', name: 'Escape Room', difficulty: 6, icon: '🚪' },
-      { id: 'pattern-master', name: 'Pattern Master', difficulty: 7, icon: '🎨' },
-      { id: 'code-breaker', name: 'Code Breaker', difficulty: 8, icon: '🔐' },
-      { id: 'mind-bender', name: 'Mind Bender', difficulty: 9, icon: '🌀' },
-      { id: 'genius-puzzle', name: 'Genius Puzzle', difficulty: 10, icon: '💡' },
-    ]
-  },
-  {
-    id: 'racing',
-    name: 'Racing/Sports',
-    icon: '🏁',
-    color: 'from-green-600 to-emerald-500',
-    description: 'Speed, competition, athletics',
-    games: [
-      { id: 'simple-race', name: 'Simple Race', difficulty: 1, icon: '🚗' },
-      { id: 'bike-sprint', name: 'Bike Sprint', difficulty: 2, icon: '🚴' },
-      { id: 'drag-race', name: 'Drag Race', difficulty: 3, icon: '🏎️' },
-      { id: 'soccer-kick', name: 'Soccer Kick', difficulty: 4, icon: '⚽' },
-      { id: 'basketball-shoot', name: 'Basketball Shoot', difficulty: 5, icon: '🏀' },
-      { id: 'golf-master', name: 'Golf Master', difficulty: 6, icon: '⛳' },
-      { id: 'circuit-racer', name: 'Circuit Racer', difficulty: 7, icon: '🏆' },
-      { id: 'extreme-sports', name: 'Extreme Sports', difficulty: 8, icon: '🎿' },
-      { id: 'championship', name: 'Championship', difficulty: 9, icon: '🥇' },
-      { id: 'ultimate-racing', name: 'Ultimate Racing', difficulty: 10, icon: '🚀' },
-    ]
-  },
-  {
-    id: 'rpg',
-    name: 'RPG/Adventure',
-    icon: '⚔️',
-    color: 'from-amber-600 to-yellow-500',
-    description: 'Story, progression, exploration',
-    games: [
-      { id: 'hero-quest', name: 'Hero Quest', difficulty: 1, icon: '🗡️' },
-      { id: 'dungeon-crawl', name: 'Dungeon Crawl', difficulty: 2, icon: '🏰' },
-      { id: 'treasure-hunter', name: 'Treasure Hunter', difficulty: 3, icon: '💰' },
-      { id: 'dragon-slayer', name: 'Dragon Slayer', difficulty: 4, icon: '🐉' },
-      { id: 'magic-quest', name: 'Magic Quest', difficulty: 5, icon: '🪄' },
-      { id: 'epic-journey', name: 'Epic Journey', difficulty: 6, icon: '🗺️' },
-      { id: 'realm-defender', name: 'Realm Defender', difficulty: 7, icon: '🛡️' },
-      { id: 'legend-maker', name: 'Legend Maker', difficulty: 8, icon: '📖' },
-      { id: 'mythic-hero', name: 'Mythic Hero', difficulty: 9, icon: '⭐' },
-      { id: 'ultimate-rpg', name: 'Ultimate RPG', difficulty: 10, icon: '👑' },
-    ]
-  },
-  {
-    id: 'simulation',
-    name: 'Simulation/Tycoon',
-    icon: '🏗️',
-    color: 'from-cyan-600 to-teal-500',
-    description: 'Build, manage, grow empires',
-    games: [
-      { id: 'lemonade-stand', name: 'Lemonade Stand', difficulty: 1, icon: '🍋' },
-      { id: 'pet-shop', name: 'Pet Shop', difficulty: 2, icon: '🐕' },
-      { id: 'farm-builder', name: 'Farm Builder', difficulty: 3, icon: '🌾' },
-      { id: 'restaurant-rush', name: 'Restaurant Rush', difficulty: 4, icon: '🍕' },
-      { id: 'city-planner', name: 'City Planner', difficulty: 5, icon: '🏙️' },
-      { id: 'airport-manager', name: 'Airport Manager', difficulty: 6, icon: '✈️' },
-      { id: 'theme-park', name: 'Theme Park', difficulty: 7, icon: '🎢' },
-      { id: 'space-station', name: 'Space Station', difficulty: 8, icon: '🛸' },
-      { id: 'mega-corp', name: 'Mega Corp', difficulty: 9, icon: '🏢' },
-      { id: 'universe-sim', name: 'Universe Sim', difficulty: 10, icon: '🌌' },
-    ]
-  },
-  {
-    id: 'shooter',
-    name: 'Shooter/Combat',
-    icon: '🎯',
-    color: 'from-rose-600 to-red-500',
-    description: 'Top-down, arena battles',
-    games: [
-      { id: 'target-practice', name: 'Target Practice', difficulty: 1, icon: '🎯' },
-      { id: 'alien-blast', name: 'Alien Blast', difficulty: 2, icon: '👽' },
-      { id: 'tank-battle', name: 'Tank Battle', difficulty: 3, icon: '🛡️' },
-      { id: 'sniper-elite', name: 'Sniper Elite', difficulty: 4, icon: '🔭' },
-      { id: 'arena-combat', name: 'Arena Combat', difficulty: 5, icon: '🏟️' },
-      { id: 'mech-warrior', name: 'Mech Warrior', difficulty: 6, icon: '🤖' },
-      { id: 'battle-royale', name: 'Battle Royale', difficulty: 7, icon: '👊' },
-      { id: 'war-zone', name: 'War Zone', difficulty: 8, icon: '💣' },
-      { id: 'elite-ops', name: 'Elite Ops', difficulty: 9, icon: '🎖️' },
-      { id: 'ultimate-shooter', name: 'Ultimate Shooter', difficulty: 10, icon: '⚡' },
-    ]
-  },
-  {
-    id: 'cards',
-    name: 'Card/Casino',
-    icon: '🃏',
-    color: 'from-violet-600 to-purple-500',
-    description: 'Poker, blackjack, card battles',
-    games: [
-      { id: 'solitaire', name: 'Solitaire', difficulty: 1, icon: '🂡' },
-      { id: 'memory-match', name: 'Memory Match', difficulty: 2, icon: '🧠' },
-      { id: 'blackjack', name: 'Blackjack', difficulty: 3, icon: '🎰' },
-      { id: 'poker-basic', name: 'Poker Basic', difficulty: 4, icon: '🃏' },
-      { id: 'uno-style', name: 'Card Battle', difficulty: 5, icon: '🎴' },
-      { id: 'rummy', name: 'Rummy', difficulty: 6, icon: '♠️' },
-      { id: 'bridge', name: 'Bridge', difficulty: 7, icon: '♥️' },
-      { id: 'tcg-battle', name: 'TCG Battle', difficulty: 8, icon: '⚔️' },
-      { id: 'poker-pro', name: 'Poker Pro', difficulty: 9, icon: '💰' },
-      { id: 'card-master', name: 'Card Master', difficulty: 10, icon: '👑' },
-    ]
-  },
-  {
-    id: 'multiplayer',
-    name: 'Multiplayer/Social',
-    icon: '👥',
-    color: 'from-orange-600 to-amber-500',
-    description: 'Co-op, competitive, party games',
-    games: [
-      { id: 'tic-tac-toe', name: 'Tic Tac Toe', difficulty: 1, icon: '⭕' },
-      { id: 'connect-four', name: 'Connect Four', difficulty: 2, icon: '🔴' },
-      { id: 'checkers', name: 'Checkers', difficulty: 3, icon: '⬛' },
-      { id: 'battleship', name: 'Battleship', difficulty: 4, icon: '🚢' },
-      { id: 'trivia-battle', name: 'Trivia Battle', difficulty: 5, icon: '❓' },
-      { id: 'word-duel', name: 'Word Duel', difficulty: 6, icon: '📝' },
-      { id: 'team-tactics', name: 'Team Tactics', difficulty: 7, icon: '🤝' },
-      { id: 'party-games', name: 'Party Games', difficulty: 8, icon: '🎉' },
-      { id: 'tournament', name: 'Tournament', difficulty: 9, icon: '🏆' },
-      { id: 'ultimate-mp', name: 'Ultimate MP', difficulty: 10, icon: '🌟' },
-    ]
-  },
-  {
-    id: 'ai',
-    name: 'AI/Creative',
-    icon: '🤖',
-    color: 'from-fuchsia-600 to-pink-500',
-    description: 'AI-powered unique experiences',
-    games: [
-      { id: 'ai-guess', name: 'AI Guess', difficulty: 1, icon: '🔮' },
-      { id: 'draw-ai', name: 'Draw & AI', difficulty: 2, icon: '🎨' },
-      { id: 'story-maker', name: 'Story Maker', difficulty: 3, icon: '📚' },
-      { id: 'music-creator', name: 'Music Creator', difficulty: 4, icon: '🎵' },
-      { id: 'ai-trivia', name: 'AI Trivia', difficulty: 5, icon: '🧠' },
-      { id: 'prediction-game', name: 'Prediction Game', difficulty: 6, icon: '📈' },
-      { id: 'art-battle', name: 'Art Battle', difficulty: 7, icon: '🖼️' },
-      { id: 'ai-adventure', name: 'AI Adventure', difficulty: 8, icon: '🗺️' },
-      { id: 'neural-network', name: 'Neural Network', difficulty: 9, icon: '🔬' },
-      { id: 'ultimate-ai', name: 'Ultimate AI', difficulty: 10, icon: '⚡' },
-    ]
-  },
-]
-
-// External Gaming Resources (from evaluation chat)
-const EXTERNAL_RESOURCES = [
-  {
-    category: 'Gaming Challenges',
-    links: [
-      { name: 'LostGamer.io', url: 'https://lostgamer.io', description: 'GeoGuessr for video games - guess locations', icon: '🗺️' },
-      { name: 'Neal.fun', url: 'https://neal.fun', description: 'Educational games & experiments', icon: '🎮' },
-    ]
-  },
-  {
-    category: 'Classic Games Portal',
-    links: [
-      { name: 'Emupedia.net', url: 'https://emupedia.net', description: 'Windows 95/98 classics in browser', icon: '💾' },
-      { name: 'PlayRetroGames.online', url: 'https://playretrogames.online', description: 'PS1, NES, SNES, Sega classics', icon: '🕹️' },
-    ]
-  },
-  {
-    category: 'Browser MMORPG',
-    links: [
-      { name: 'Hordes.io', url: 'https://hordes.io', description: 'Free 3D browser MMORPG', icon: '⚔️' },
-    ]
-  },
-  {
-    category: 'Gaming Resources',
-    links: [
-      { name: 'Modrinth.com', url: 'https://modrinth.com', description: 'Minecraft mods platform', icon: '🔧' },
-      { name: 'GrabCraft.com', url: 'https://grabcraft.com', description: 'Minecraft blueprints & schematics', icon: '🏗️' },
-      { name: 'CheapShark.com', url: 'https://cheapshark.com', description: 'PC game price comparison', icon: '💰' },
-    ]
-  },
-  {
-    category: 'Game Development',
-    links: [
-      { name: 'Kenney.nl', url: 'https://kenney.nl', description: '40K+ free game assets (CC0)', icon: '🎨' },
-      { name: 'Poly Haven', url: 'https://polyhaven.com', description: 'Free 3D models & textures', icon: '🖼️' },
-      { name: 'Freesound.org', url: 'https://freesound.org', description: '500K+ free sound effects', icon: '🔊' },
-    ]
-  },
-]
-
-// Active Game Component - Will hold the currently playing game
-interface GameState {
-  gameId: string
-  score: number
-  level: number
-  isPlaying: boolean
-}
-
-// =============================================================================
-// GAME ENGINES - Each category has its own game logic
-// =============================================================================
-
-// Simple Space Shooter Game
+// ============ SPACE SHOOTER GAME ============
 function SpaceShooterGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [score, setScore] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [level, setLevel] = useState(1)
+  
+  interface Enemy { x: number; y: number; speed: number; health: number; type: string }
+  interface Bullet { x: number; y: number; vy: number; damage: number }
+  interface Particle { x: number; y: number; vx: number; vy: number; life: number; color: string }
   
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     
     let animationId: number
     let playerX = canvas.width / 2
-    const playerY = canvas.height - 50
-    let bullets: { x: number; y: number }[] = []
-    let enemies: { x: number; y: number; speed: number }[] = []
+    const playerY = canvas.height - 60
+    let bullets: Bullet[] = []
+    let enemies: Enemy[] = []
+    let particles: Particle[] = []
     let gameScore = 0
-    let gameOver = false
+    let currentLevel = 1
+    let isGameOver = false
+    let lastShot = 0
+    let frame = 0
+    const keys = new Set<string>()
     
-    // Spawn enemies
-    const spawnEnemy = () => {
-      if (!gameOver) {
-        enemies.push({
-          x: Math.random() * (canvas.width - 30),
-          y: -30,
-          speed: 2 + Math.random() * 2
+    const createExplosion = (x: number, y: number, color: string, count: number) => {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count
+        const speed = 2 + Math.random() * 3
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 30,
+          color
         })
       }
     }
     
-    const enemyInterval = setInterval(spawnEnemy, 1000)
-    
-    // Handle keyboard
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') playerX = Math.max(20, playerX - 20)
-      if (e.key === 'ArrowRight') playerX = Math.min(canvas.width - 20, playerX + 20)
-      if (e.key === ' ' || e.key === 'ArrowUp') {
-        bullets.push({ x: playerX, y: playerY - 20 })
+    const spawnEnemy = () => {
+      if (isGameOver) return
+      const types = ['scout', 'fighter', 'bomber']
+      const type = types[Math.floor(Math.random() * Math.min(types.length, currentLevel))]
+      const configs: Record<string, { health: number; speed: number }> = {
+        scout: { health: 1, speed: 3 + currentLevel * 0.2 },
+        fighter: { health: 2, speed: 2 + currentLevel * 0.15 },
+        bomber: { health: 4, speed: 1 + currentLevel * 0.1 }
       }
+      enemies.push({
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: -30,
+        speed: configs[type].speed,
+        health: configs[type].health,
+        type
+      })
     }
     
-    window.addEventListener('keydown', handleKeyDown)
+    const enemyInterval = setInterval(spawnEnemy, 1200 - Math.min(currentLevel * 50, 600))
     
-    // Game loop
-    const gameLoop = () => {
-      if (gameOver) return
-      
-      ctx.fillStyle = '#0a0a1a'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
-      // Draw stars
-      ctx.fillStyle = '#ffffff33'
-      for (let i = 0; i < 50; i++) {
-        ctx.fillRect(
-          (i * 17 + Date.now() / 50) % canvas.width,
-          (i * 23 + Date.now() / 100) % canvas.height,
-          2, 2
-        )
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keys.add(e.key.toLowerCase())
+      if ([' ', 'arrowleft', 'arrowright', 'a', 'd'].includes(e.key.toLowerCase())) {
+        e.preventDefault()
       }
-      
-      // Draw player
-      ctx.fillStyle = '#00ff88'
+    }
+    const handleKeyUp = (e: KeyboardEvent) => keys.delete(e.key.toLowerCase())
+    
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    
+    const drawSpaceship = (x: number, y: number) => {
+      // Engine glow
+      const glowGradient = ctx.createRadialGradient(x, y + 25, 0, x, y + 25, 20)
+      glowGradient.addColorStop(0, `rgba(0, 200, 255, ${0.8 + Math.sin(frame * 0.2) * 0.2})`)
+      glowGradient.addColorStop(0.5, 'rgba(0, 100, 255, 0.4)')
+      glowGradient.addColorStop(1, 'rgba(0, 50, 255, 0)')
+      ctx.fillStyle = glowGradient
       ctx.beginPath()
-      ctx.moveTo(playerX, playerY - 20)
-      ctx.lineTo(playerX - 15, playerY + 10)
-      ctx.lineTo(playerX + 15, playerY + 10)
+      ctx.ellipse(x, y + 22, 10, 15 + Math.sin(frame * 0.3) * 3, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Ship body
+      const bodyGradient = ctx.createLinearGradient(x - 20, y, x + 20, y)
+      bodyGradient.addColorStop(0, '#1a1a3e')
+      bodyGradient.addColorStop(0.3, '#4a4a8e')
+      bodyGradient.addColorStop(0.5, '#6a6abe')
+      bodyGradient.addColorStop(0.7, '#4a4a8e')
+      bodyGradient.addColorStop(1, '#1a1a3e')
+      ctx.fillStyle = bodyGradient
+      ctx.beginPath()
+      ctx.moveTo(x, y - 20)
+      ctx.lineTo(x + 18, y + 15)
+      ctx.lineTo(x + 8, y + 12)
+      ctx.lineTo(x + 8, y + 20)
+      ctx.lineTo(x - 8, y + 20)
+      ctx.lineTo(x - 8, y + 12)
+      ctx.lineTo(x - 18, y + 15)
       ctx.closePath()
       ctx.fill()
       
-      // Update and draw bullets
+      // Cockpit
+      const cockpitGradient = ctx.createRadialGradient(x, y - 3, 0, x, y - 3, 8)
+      cockpitGradient.addColorStop(0, '#00ffff')
+      cockpitGradient.addColorStop(0.5, '#0088aa')
+      cockpitGradient.addColorStop(1, '#004466')
+      ctx.fillStyle = cockpitGradient
+      ctx.beginPath()
+      ctx.ellipse(x, y - 3, 5, 8, 0, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    
+    const drawEnemy = (enemy: Enemy) => {
+      const colors: Record<string, string> = { scout: '#ff4444', fighter: '#aa44aa', bomber: '#4444aa' }
+      const sizes: Record<string, number> = { scout: 12, fighter: 18, bomber: 25 }
+      
+      const gradient = ctx.createRadialGradient(enemy.x, enemy.y, 0, enemy.x, enemy.y, sizes[enemy.type])
+      gradient.addColorStop(0, colors[enemy.type])
+      gradient.addColorStop(1, '#000')
+      ctx.fillStyle = gradient
+      
+      if (enemy.type === 'scout') {
+        ctx.beginPath()
+        ctx.moveTo(enemy.x, enemy.y + 12)
+        ctx.lineTo(enemy.x - 10, enemy.y - 8)
+        ctx.lineTo(enemy.x, enemy.y - 3)
+        ctx.lineTo(enemy.x + 10, enemy.y - 8)
+        ctx.closePath()
+        ctx.fill()
+      } else if (enemy.type === 'fighter') {
+        ctx.beginPath()
+        ctx.moveTo(enemy.x, enemy.y + 18)
+        ctx.lineTo(enemy.x - 15, enemy.y - 5)
+        ctx.lineTo(enemy.x - 22, enemy.y - 12)
+        ctx.lineTo(enemy.x - 8, enemy.y - 8)
+        ctx.lineTo(enemy.x, enemy.y - 15)
+        ctx.lineTo(enemy.x + 8, enemy.y - 8)
+        ctx.lineTo(enemy.x + 22, enemy.y - 12)
+        ctx.lineTo(enemy.x + 15, enemy.y - 5)
+        ctx.closePath()
+        ctx.fill()
+      } else {
+        ctx.beginPath()
+        ctx.arc(enemy.x, enemy.y, sizes[enemy.type], 0, Math.PI * 2)
+        ctx.fill()
+        ctx.strokeStyle = '#6666ff'
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.arc(enemy.x, enemy.y, 20, frame * 0.05, frame * 0.05 + Math.PI * 1.5)
+        ctx.stroke()
+      }
+      
+      // Health bar
+      if (enemy.health > 1) {
+        ctx.fillStyle = '#333'
+        ctx.fillRect(enemy.x - 15, enemy.y - 25, 30, 4)
+        ctx.fillStyle = '#0f0'
+        ctx.fillRect(enemy.x - 15, enemy.y - 25, (enemy.health / 4) * 30, 4)
+      }
+    }
+    
+    const gameLoop = () => {
+      if (isGameOver) return
+      frame++
+      
+      // Background
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+      bgGradient.addColorStop(0, '#0a0a1a')
+      bgGradient.addColorStop(0.5, '#0a1a2a')
+      bgGradient.addColorStop(1, '#1a0a2a')
+      ctx.fillStyle = bgGradient
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // Stars
+      ctx.fillStyle = '#fff'
+      for (let i = 0; i < 80; i++) {
+        const starX = (i * 73 + frame * 0.5) % canvas.width
+        const starY = (i * 37 + frame * (0.2 + (i % 3) * 0.1)) % canvas.height
+        ctx.globalAlpha = 0.3 + (i % 5) * 0.15
+        ctx.fillRect(starX, starY, 1 + (i % 2), 1 + (i % 2))
+      }
+      ctx.globalAlpha = 1
+      
+      // Player movement
+      if (keys.has('arrowleft') || keys.has('a')) playerX = Math.max(20, playerX - 6)
+      if (keys.has('arrowright') || keys.has('d')) playerX = Math.min(canvas.width - 20, playerX + 6)
+      
+      // Shooting
+      if (keys.has(' ') && Date.now() - lastShot > 150) {
+        lastShot = Date.now()
+        bullets.push({ x: playerX, y: playerY - 20, vy: -10, damage: 1 })
+      }
+      
+      // Update bullets
       bullets = bullets.filter(b => {
-        b.y -= 10
-        ctx.fillStyle = '#ffff00'
-        ctx.fillRect(b.x - 2, b.y, 4, 10)
-        return b.y > 0
+        b.y += b.vy
+        ctx.fillStyle = '#0ff'
+        ctx.shadowColor = '#0ff'
+        ctx.shadowBlur = 8
+        ctx.fillRect(b.x - 2, b.y, 4, 12)
+        ctx.shadowBlur = 0
+        return b.y > -20
       })
       
-      // Update and draw enemies
+      // Update enemies
       enemies = enemies.filter(e => {
         e.y += e.speed
-        ctx.fillStyle = '#ff4444'
-        ctx.fillRect(e.x, e.y, 30, 30)
         
-        // Check collision with player
-        if (e.y > playerY - 20 && Math.abs(e.x + 15 - playerX) < 25) {
-          gameOver = true
-          onGameOver()
-          return false
-        }
-        
-        // Check collision with bullets
-        for (let i = bullets.length - 1; i >= 0; i--) {
-          const b = bullets[i]
-          if (b.x > e.x && b.x < e.x + 30 && b.y > e.y && b.y < e.y + 30) {
-            bullets.splice(i, 1)
-            gameScore += 10
-            setScore(gameScore)
-            onScore(gameScore)
+        // Bullet collision
+        bullets = bullets.filter(b => {
+          const dx = b.x - e.x
+          const dy = b.y - e.y
+          if (Math.sqrt(dx * dx + dy * dy) < 20) {
+            e.health -= b.damage
+            createExplosion(b.x, b.y, '#ff0', 5)
+            if (e.health <= 0) {
+              gameScore += e.type === 'bomber' ? 30 : e.type === 'fighter' ? 20 : 10
+              setScore(gameScore)
+              onScore(gameScore)
+              createExplosion(e.x, e.y, '#f40', 15)
+              if (gameScore > currentLevel * 200) {
+                currentLevel++
+                setLevel(currentLevel)
+              }
+            }
             return false
           }
+          return true
+        })
+        
+        // Player collision
+        const pdx = e.x - playerX
+        const pdy = e.y - playerY
+        if (Math.sqrt(pdx * pdx + pdy * pdy) < 25 && e.health > 0) {
+          isGameOver = true
+          setGameOver(true)
+          onGameOver()
+          createExplosion(playerX, playerY, '#f00', 30)
         }
         
-        return e.y < canvas.height
+        if (e.health > 0) drawEnemy(e)
+        return e.y < canvas.height + 30 && e.health > 0
       })
       
-      // Draw score
-      ctx.fillStyle = '#ffffff'
-      ctx.font = '20px monospace'
-      ctx.fillText(`Score: ${gameScore}`, 10, 30)
+      // Update particles
+      particles = particles.filter(p => {
+        p.x += p.vx
+        p.y += p.vy
+        p.vy += 0.1
+        p.life--
+        ctx.globalAlpha = p.life / 30
+        ctx.fillStyle = p.color
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, 3 * (p.life / 30), 0, Math.PI * 2)
+        ctx.fill()
+        ctx.globalAlpha = 1
+        return p.life > 0
+      })
+      
+      // Draw player
+      if (!isGameOver) drawSpaceship(playerX, playerY)
+      
+      // HUD
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 18px Arial'
+      ctx.textAlign = 'left'
+      ctx.fillText(`SCORE: ${gameScore}`, 10, 25)
+      ctx.fillText(`LEVEL: ${currentLevel}`, 10, 50)
       
       animationId = requestAnimationFrame(gameLoop)
     }
@@ -372,51 +288,59 @@ function SpaceShooterGame({ onScore, onGameOver }: { onScore: (s: number) => voi
     gameLoop()
     
     return () => {
-      cancelAnimationFrame(animationId)
       clearInterval(enemyInterval)
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+      cancelAnimationFrame(animationId)
     }
   }, [onScore, onGameOver])
   
   return (
-    <div className="flex flex-col items-center">
-      <canvas 
-        ref={canvasRef} 
-        width={400} 
-        height={500}
-        className="border-2 border-green-500 rounded-lg"
-      />
-      <p className="text-sm text-gray-400 mt-2">Use ← → to move, SPACE to shoot</p>
+    <div className="relative">
+      <canvas ref={canvasRef} width={450} height={550} className="rounded-xl border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/20" />
+      {gameOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-red-500 mb-2">GAME OVER</h2>
+            <p className="text-xl text-white mb-1">Score: {score}</p>
+            <p className="text-lg text-cyan-400 mb-4">Level: {level}</p>
+            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-cyan-600 rounded-lg text-white font-bold hover:bg-cyan-500">
+              🚀 PLAY AGAIN
+            </button>
+          </div>
+        </div>
+      )}
+      <p className="text-center text-gray-400 text-sm mt-2">Arrow Keys/WASD to move • SPACE to shoot</p>
     </div>
   )
 }
 
-// Match 3 Puzzle Game
+// ============ MATCH-3 PUZZLE GAME ============
 function Match3Game({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
   const [grid, setGrid] = useState<number[][]>([])
   const [selected, setSelected] = useState<{ row: number; col: number } | null>(null)
   const [score, setScore] = useState(0)
   const [moves, setMoves] = useState(30)
+  const [combo, setCombo] = useState(1)
   
-  const colors = ['🔴', '🟢', '🔵', '🟡', '🟣', '🟠']
+  const gems = ['💎', '🔴', '🟢', '🔵', '🟡', '🟣', '🟠']
   
   useEffect(() => {
-    // Initialize grid
     const newGrid: number[][] = []
     for (let i = 0; i < 8; i++) {
       const row: number[] = []
       for (let j = 0; j < 8; j++) {
-        row.push(Math.floor(Math.random() * 6))
+        row.push(Math.floor(Math.random() * 7))
       }
       newGrid.push(row)
     }
     setGrid(newGrid)
   }, [])
   
-  const checkMatches = (g: number[][]) => {
+  const findMatches = (g: number[][]) => {
     const matches: Set<string> = new Set()
     
-    // Check horizontal
+    // Horizontal
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 6; j++) {
         if (g[i][j] === g[i][j + 1] && g[i][j] === g[i][j + 2]) {
@@ -427,7 +351,7 @@ function Match3Game({ onScore, onGameOver }: { onScore: (s: number) => void, onG
       }
     }
     
-    // Check vertical
+    // Vertical
     for (let i = 0; i < 6; i++) {
       for (let j = 0; j < 8; j++) {
         if (g[i][j] === g[i + 1][j] && g[i][j] === g[i + 2][j]) {
@@ -442,1034 +366,790 @@ function Match3Game({ onScore, onGameOver }: { onScore: (s: number) => void, onG
   }
   
   const handleClick = (row: number, col: number) => {
+    if (moves <= 0) return
+    
     if (!selected) {
       setSelected({ row, col })
     } else {
-      // Check if adjacent
-      const isAdjacent = 
-        (Math.abs(selected.row - row) === 1 && selected.col === col) ||
-        (Math.abs(selected.col - col) === 1 && selected.row === row)
+      const dr = Math.abs(selected.row - row)
+      const dc = Math.abs(selected.col - col)
       
-      if (isAdjacent) {
-        // Swap
+      if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
         const newGrid = grid.map(r => [...r])
         const temp = newGrid[row][col]
         newGrid[row][col] = newGrid[selected.row][selected.col]
         newGrid[selected.row][selected.col] = temp
         
-        const matches = checkMatches(newGrid)
+        const matches = findMatches(newGrid)
+        
         if (matches.size > 0) {
-          // Remove matches and add score
-          matches.forEach(m => {
-            const [r, c] = m.split(',').map(Number)
-            newGrid[r][c] = Math.floor(Math.random() * 6)
+          // Clear matches
+          matches.forEach(pos => {
+            const [r, c] = pos.split(',').map(Number)
+            newGrid[r][c] = Math.floor(Math.random() * 7)
           })
-          const newScore = score + matches.size * 10
+          
+          const points = matches.size * 10 * combo
+          const newScore = score + points
           setScore(newScore)
           onScore(newScore)
+          setCombo(c => Math.min(c + 0.5, 5))
+          setMoves(m => m - 1)
+          setGrid(newGrid)
         } else {
-          // Swap back
-          newGrid[selected.row][selected.col] = newGrid[row][col]
-          newGrid[row][col] = temp
+          setCombo(1)
         }
-        
-        setGrid(newGrid)
-        setMoves(m => {
-          if (m <= 1) {
-            onGameOver()
-            return 0
-          }
-          return m - 1
-        })
       }
       setSelected(null)
     }
   }
   
-  if (grid.length === 0) return <div>Loading...</div>
+  useEffect(() => {
+    if (moves <= 0) onGameOver()
+  }, [moves, onGameOver])
   
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex justify-between w-full max-w-xs mb-4">
-        <span className="text-white">Score: {score}</span>
-        <span className="text-white">Moves: {moves}</span>
+    <div className="p-4 bg-gradient-to-b from-purple-900 to-indigo-900 rounded-xl">
+      <div className="flex justify-between mb-3 text-white">
+        <span className="font-bold">💎 Score: {score}</span>
+        <span className="font-bold">🔥 x{combo.toFixed(1)}</span>
+        <span className="font-bold">⏱️ Moves: {moves}</span>
       </div>
-      <div className="grid grid-cols-8 gap-1 p-2 bg-gray-800 rounded-lg">
-        {grid.map((row, i) =>
-          row.map((cell, j) => (
+      <div className="grid grid-cols-8 gap-1 p-2 bg-black/30 rounded-lg">
+        {grid.map((row, r) =>
+          row.map((gem, c) => (
             <button
-              key={`${i}-${j}`}
-              onClick={() => handleClick(i, j)}
-              className={`w-8 h-8 text-xl flex items-center justify-center rounded transition-all ${
-                selected?.row === i && selected?.col === j
-                  ? 'ring-2 ring-white scale-110'
-                  : 'hover:scale-105'
+              key={`${r}-${c}`}
+              onClick={() => handleClick(r, c)}
+              className={`w-10 h-10 text-2xl rounded-lg transition-all duration-150 ${
+                selected?.row === r && selected?.col === c
+                  ? 'ring-2 ring-yellow-400 scale-110 bg-yellow-400/30'
+                  : 'hover:scale-105 hover:bg-white/10'
               }`}
             >
-              {colors[cell]}
+              {gems[gem]}
             </button>
           ))
         )}
       </div>
-      <p className="text-sm text-gray-400 mt-2">Match 3 or more of the same color!</p>
+      <p className="text-center text-purple-300 text-sm mt-2">Click gems to swap adjacent pairs</p>
     </div>
   )
 }
 
-// Tower Defense Game
+// ============ TOWER DEFENSE GAME ============
 function TowerDefenseGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [gold, setGold] = useState(100)
-  const [lives, setLives] = useState(10)
-  const [wave, setWave] = useState(1)
-  const [score, setScore] = useState(0)
+  const [money, setMoney] = useState(150)
+  const [lives, setLives] = useState(20)
+  const [wave, setWave] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
   
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     
-    let animationId: number
-    let towers: { x: number; y: number; range: number; damage: number; cooldown: number }[] = []
-    let enemies: { x: number; y: number; health: number; maxHealth: number; speed: number }[] = []
-    let projectiles: { x: number; y: number; targetX: number; targetY: number }[] = []
-    let currentGold = 100
-    let currentLives = 10
-    let currentScore = 0
-    let gameOver = false
+    interface Tower { x: number; y: number; cooldown: number; range: number; damage: number }
+    interface Enemy { x: number; y: number; health: number; maxHealth: number; speed: number; pathIndex: number }
     
-    // Path for enemies
     const path = [
-      { x: 0, y: 150 },
-      { x: 100, y: 150 },
-      { x: 100, y: 50 },
-      { x: 250, y: 50 },
-      { x: 250, y: 250 },
-      { x: 350, y: 250 },
-      { x: 350, y: 150 },
-      { x: 400, y: 150 },
+      { x: 0, y: 150 }, { x: 120, y: 150 }, { x: 120, y: 80 }, { x: 280, y: 80 },
+      { x: 280, y: 220 }, { x: 180, y: 220 }, { x: 180, y: 300 }, { x: 350, y: 300 }, { x: 400, y: 300 }
     ]
     
-    // Spawn enemies
-    let enemyCount = 0
-    const spawnEnemy = () => {
-      if (gameOver || enemyCount >= 5) return
-      enemies.push({
-        x: path[0].x,
-        y: path[0].y,
-        health: 50 + wave * 10,
-        maxHealth: 50 + wave * 10,
-        speed: 0.5 + wave * 0.1,
-      })
-      enemyCount++
+    let towers: Tower[] = []
+    let enemies: Enemy[] = []
+    let playerMoney = 150
+    let playerLives = 20
+    let currentWave = 0
+    let enemiesSpawned = 0
+    let spawnCooldown = 0
+    let isGameOver = false
+    let frame = 0
+    
+    const spawnWave = () => {
+      currentWave++
+      setWave(currentWave)
+      enemiesSpawned = 0
     }
     
-    const enemyInterval = setInterval(spawnEnemy, 2000)
-    
-    // Place tower on click
     const handleClick = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
       
-      if (currentGold >= 50) {
-        towers.push({ x, y, range: 80, damage: 10, cooldown: 0 })
-        currentGold -= 50
-        setGold(currentGold)
+      if (playerMoney >= 50) {
+        // Check not on path
+        let onPath = false
+        for (const p of path) {
+          if (Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2) < 35) onPath = true
+        }
+        // Check not on other tower
+        for (const t of towers) {
+          if (Math.sqrt((x - t.x) ** 2 + (y - t.y) ** 2) < 40) onPath = true
+        }
+        
+        if (!onPath) {
+          towers.push({ x, y, cooldown: 0, range: 80, damage: 20 })
+          playerMoney -= 50
+          setMoney(playerMoney)
+        }
       }
     }
     
     canvas.addEventListener('click', handleClick)
     
-    // Game loop
     const gameLoop = () => {
-      if (gameOver) return
+      if (isGameOver) return
+      frame++
       
-      ctx.fillStyle = '#1a1a2e'
+      // Background
+      ctx.fillStyle = '#1a2a1a'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      // Draw path
-      ctx.strokeStyle = '#333'
+      // Grid
+      ctx.strokeStyle = '#2a3a2a'
+      for (let x = 0; x < canvas.width; x += 30) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke()
+      }
+      for (let y = 0; y < canvas.height; y += 30) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke()
+      }
+      
+      // Path
+      ctx.strokeStyle = '#665544'
       ctx.lineWidth = 30
+      ctx.lineCap = 'round'
       ctx.beginPath()
       ctx.moveTo(path[0].x, path[0].y)
-      for (let i = 1; i < path.length; i++) {
-        ctx.lineTo(path[i].x, path[i].y)
-      }
+      for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y)
       ctx.stroke()
       
-      // Draw towers
-      towers.forEach(t => {
-        ctx.fillStyle = '#4488ff'
-        ctx.beginPath()
-        ctx.arc(t.x, t.y, 15, 0, Math.PI * 2)
-        ctx.fill()
-        
-        // Range indicator
-        ctx.strokeStyle = '#4488ff33'
-        ctx.beginPath()
-        ctx.arc(t.x, t.y, t.range, 0, Math.PI * 2)
-        ctx.stroke()
-        
-        // Shoot at enemies
-        if (t.cooldown <= 0) {
-          for (const e of enemies) {
-            const dist = Math.sqrt((e.x - t.x) ** 2 + (e.y - t.y) ** 2)
-            if (dist < t.range) {
-              projectiles.push({ x: t.x, y: t.y, targetX: e.x, targetY: e.y })
-              e.health -= t.damage
-              t.cooldown = 30
-              break
-            }
-          }
-        } else {
-          t.cooldown--
+      // Spawn enemies
+      if (enemiesSpawned < 5 + currentWave * 2) {
+        spawnCooldown--
+        if (spawnCooldown <= 0) {
+          enemies.push({
+            x: path[0].x, y: path[0].y,
+            health: 30 + currentWave * 10,
+            maxHealth: 30 + currentWave * 10,
+            speed: 1 + currentWave * 0.1,
+            pathIndex: 0
+          })
+          enemiesSpawned++
+          spawnCooldown = 40
         }
-      })
-      
-      // Update projectiles
-      projectiles = projectiles.filter(p => {
-        const dx = p.targetX - p.x
-        const dy = p.targetY - p.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 5) return false
-        p.x += (dx / dist) * 10
-        p.y += (dy / dist) * 10
-        
-        ctx.fillStyle = '#ffff00'
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
-        ctx.fill()
-        
-        return true
-      })
+      } else if (enemies.length === 0) {
+        spawnWave()
+      }
       
       // Update enemies
       enemies = enemies.filter(e => {
-        if (e.health <= 0) {
-          currentGold += 10
-          currentScore += 10
-          setGold(currentGold)
-          setScore(currentScore)
-          onScore(currentScore)
-          return false
-        }
-        
-        // Move along path
-        let pathIndex = 0
-        for (let i = 0; i < path.length - 1; i++) {
-          if (Math.abs(e.x - path[i].x) < 5 && Math.abs(e.y - path[i].y) < 5) {
-            pathIndex = i + 1
-            break
-          }
-        }
-        
-        if (pathIndex < path.length) {
-          const target = path[pathIndex]
+        const target = path[e.pathIndex + 1]
+        if (target) {
           const dx = target.x - e.x
           const dy = target.y - e.y
           const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist > 1) {
+          if (dist < e.speed) e.pathIndex++
+          else {
             e.x += (dx / dist) * e.speed
             e.y += (dy / dist) * e.speed
           }
-        }
-        
-        // Draw enemy
-        ctx.fillStyle = '#ff4444'
-        ctx.beginPath()
-        ctx.arc(e.x, e.y, 12, 0, Math.PI * 2)
-        ctx.fill()
-        
-        // Health bar
-        ctx.fillStyle = '#333'
-        ctx.fillRect(e.x - 15, e.y - 20, 30, 5)
-        ctx.fillStyle = '#00ff00'
-        ctx.fillRect(e.x - 15, e.y - 20, 30 * (e.health / e.maxHealth), 5)
-        
-        // Check if reached end
-        if (e.x >= path[path.length - 1].x - 5) {
-          currentLives--
-          setLives(currentLives)
-          if (currentLives <= 0) {
-            gameOver = true
+        } else {
+          playerLives--
+          setLives(playerLives)
+          if (playerLives <= 0) {
+            isGameOver = true
+            setGameOver(true)
             onGameOver()
           }
           return false
         }
         
-        return true
+        // Draw enemy
+        ctx.fillStyle = '#44aa44'
+        ctx.beginPath()
+        ctx.arc(e.x, e.y, 10, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // Health bar
+        ctx.fillStyle = '#400'
+        ctx.fillRect(e.x - 12, e.y - 18, 24, 4)
+        ctx.fillStyle = '#0f0'
+        ctx.fillRect(e.x - 12, e.y - 18, (e.health / e.maxHealth) * 24, 4)
+        
+        return e.health > 0
       })
       
-      // Draw UI
-      ctx.fillStyle = '#ffffff'
-      ctx.font = '14px monospace'
-      ctx.fillText(`Gold: ${currentGold} | Lives: ${currentLives} | Wave: ${wave}`, 10, 20)
-      ctx.fillText('Click to place tower (50 gold)', 10, canvas.height - 10)
+      // Update towers
+      for (const tower of towers) {
+        // Find target
+        let target: Enemy | null = null
+        let closestDist = tower.range
+        for (const e of enemies) {
+          const dist = Math.sqrt((e.x - tower.x) ** 2 + (e.y - tower.y) ** 2)
+          if (dist < closestDist) {
+            closestDist = dist
+            target = e
+          }
+        }
+        
+        // Draw tower
+        ctx.fillStyle = '#4488ff'
+        ctx.beginPath()
+        ctx.arc(tower.x, tower.y, 15, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.strokeStyle = '#88aaff'
+        ctx.lineWidth = 2
+        ctx.stroke()
+        
+        // Shoot
+        tower.cooldown--
+        if (tower.cooldown <= 0 && target) {
+          tower.cooldown = 30
+          target.health -= tower.damage
+          
+          if (target.health <= 0) {
+            playerMoney += 10
+            setMoney(playerMoney)
+            onScore(currentWave * 100 + playerMoney)
+          }
+          
+          // Laser line
+          ctx.strokeStyle = '#ff0'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(tower.x, tower.y)
+          ctx.lineTo(target.x, target.y)
+          ctx.stroke()
+        }
+        
+        // Range indicator
+        if (frame % 60 < 30) {
+          ctx.strokeStyle = '#4488ff33'
+          ctx.beginPath()
+          ctx.arc(tower.x, tower.y, tower.range, 0, Math.PI * 2)
+          ctx.stroke()
+        }
+      }
       
-      animationId = requestAnimationFrame(gameLoop)
+      // HUD
+      ctx.fillStyle = 'rgba(0,0,0,0.7)'
+      ctx.fillRect(0, 0, canvas.width, 35)
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 14px Arial'
+      ctx.textAlign = 'left'
+      ctx.fillText(`💰 $${playerMoney}`, 10, 24)
+      ctx.fillText(`❤️ ${playerLives}`, 100, 24)
+      ctx.fillText(`🌊 Wave: ${currentWave}`, 170, 24)
+      ctx.fillText(`🏗️ Tower: $50`, 290, 24)
+      
+      requestAnimationFrame(gameLoop)
     }
     
+    spawnWave()
     gameLoop()
     
-    return () => {
-      cancelAnimationFrame(animationId)
-      clearInterval(enemyInterval)
-      canvas.removeEventListener('click', handleClick)
-    }
-  }, [wave, onScore, onGameOver])
+    return () => canvas.removeEventListener('click', handleClick)
+  }, [onScore, onGameOver])
   
   return (
-    <div className="flex flex-col items-center">
-      <canvas 
-        ref={canvasRef} 
-        width={400} 
-        height={300}
-        className="border-2 border-blue-500 rounded-lg cursor-crosshair"
-      />
-      <p className="text-sm text-gray-400 mt-2">Click to place towers, defend against enemies!</p>
+    <div className="relative">
+      <canvas ref={canvasRef} width={400} height={350} className="rounded-xl border-2 border-green-500/50 shadow-lg shadow-green-500/20 cursor-crosshair" />
+      {gameOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-red-500 mb-2">GAME OVER</h2>
+            <p className="text-lg text-white mb-4">Wave Reached: {wave}</p>
+            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-green-600 rounded-lg text-white font-bold hover:bg-green-500">
+              🔄 TRY AGAIN
+            </button>
+          </div>
+        </div>
+      )}
+      <p className="text-center text-gray-400 text-sm mt-2">Click to place towers ($50 each)</p>
     </div>
   )
 }
 
-// Memory Match Game
-function MemoryMatchGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
-  const [cards, setCards] = useState<{ id: number; emoji: string; flipped: boolean; matched: boolean }[]>([])
-  const [flippedCards, setFlippedCards] = useState<number[]>([])
-  const [moves, setMoves] = useState(0)
-  const [matches, setMatches] = useState(0)
-  
-  const emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼']
-  
-  useEffect(() => {
-    const shuffled = [...emojis, ...emojis]
-      .sort(() => Math.random() - 0.5)
-      .map((emoji, id) => ({ id, emoji, flipped: false, matched: false }))
-    setCards(shuffled)
-  }, [])
-  
-  const handleCardClick = (id: number) => {
-    if (flippedCards.length === 2) return
-    if (cards[id].matched || cards[id].flipped) return
-    
-    const newCards = [...cards]
-    newCards[id].flipped = true
-    setCards(newCards)
-    
-    const newFlipped = [...flippedCards, id]
-    setFlippedCards(newFlipped)
-    
-    if (newFlipped.length === 2) {
-      setMoves(m => m + 1)
-      
-      if (cards[newFlipped[0]].emoji === cards[newFlipped[1]].emoji) {
-        // Match!
-        setTimeout(() => {
-          const matchedCards = [...cards]
-          matchedCards[newFlipped[0]].matched = true
-          matchedCards[newFlipped[1]].matched = true
-          setCards(matchedCards)
-          setFlippedCards([])
-          
-          const newMatches = matches + 1
-          setMatches(newMatches)
-          onScore(newMatches * 100)
-          
-          if (newMatches === 8) {
-            onGameOver()
-          }
-        }, 500)
-      } else {
-        // No match
-        setTimeout(() => {
-          const resetCards = [...cards]
-          resetCards[newFlipped[0]].flipped = false
-          resetCards[newFlipped[1]].flipped = false
-          setCards(resetCards)
-          setFlippedCards([])
-        }, 1000)
-      }
-    }
-  }
-  
-  return (
-    <div className="flex flex-col items-center">
-      <div className="flex justify-between w-full max-w-xs mb-4">
-        <span className="text-white">Moves: {moves}</span>
-        <span className="text-white">Matches: {matches}/8</span>
-      </div>
-      <div className="grid grid-cols-4 gap-2">
-        {cards.map((card) => (
-          <button
-            key={card.id}
-            onClick={() => handleCardClick(card.id)}
-            className={`w-16 h-16 text-2xl rounded-lg transition-all duration-300 ${
-              card.flipped || card.matched
-                ? 'bg-purple-600'
-                : 'bg-gray-700 hover:bg-gray-600'
-            } ${card.matched ? 'opacity-50' : ''}`}
-          >
-            {card.flipped || card.matched ? card.emoji : '❓'}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Simple Racing Game
-function SimpleRaceGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
+// ============ RACING GAME ============
+function RacingGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [score, setScore] = useState(0)
+  const [lap, setLap] = useState(0)
+  const [position, setPosition] = useState(1)
+  const [finished, setFinished] = useState(false)
   
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     
-    let animationId: number
-    let playerX = canvas.width / 2
-    let obstacles: { x: number; y: number; width: number }[] = []
-    let gameScore = 0
-    let speed = 5
-    let gameOver = false
+    interface Car { x: number; y: number; angle: number; speed: number; checkpoint: number; lap: number; isPlayer: boolean; color: string }
     
-    const spawnObstacle = () => {
-      if (!gameOver) {
-        const width = 40 + Math.random() * 60
-        obstacles.push({
-          x: Math.random() * (canvas.width - width),
-          y: -50,
-          width
-        })
+    const track = [
+      { x: 200, y: 280 }, { x: 80, y: 240 }, { x: 50, y: 150 }, { x: 100, y: 60 },
+      { x: 200, y: 40 }, { x: 320, y: 60 }, { x: 380, y: 150 }, { x: 350, y: 240 }
+    ]
+    
+    const player: Car = { x: 200, y: 300, angle: -Math.PI/2, speed: 0, checkpoint: 0, lap: 0, isPlayer: true, color: '#ff4444' }
+    const opponents: Car[] = [
+      { x: 180, y: 320, angle: -Math.PI/2, speed: 0, checkpoint: 0, lap: 0, isPlayer: false, color: '#4444ff' },
+      { x: 220, y: 320, angle: -Math.PI/2, speed: 0, checkpoint: 0, lap: 0, isPlayer: false, color: '#44ff44' }
+    ]
+    
+    const keys = new Set<string>()
+    let gameRunning = true
+    let countdown = 3
+    let raceStarted = false
+    
+    const countdownInterval = setInterval(() => {
+      if (countdown > 0) countdown--
+      else raceStarted = true
+    }, 1000)
+    
+    const handleKeyDown = (e: KeyboardEvent) => keys.add(e.key.toLowerCase())
+    const handleKeyUp = (e: KeyboardEvent) => keys.delete(e.key.toLowerCase())
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    
+    const drawCar = (car: Car) => {
+      ctx.save()
+      ctx.translate(car.x, car.y)
+      ctx.rotate(car.angle + Math.PI / 2)
+      
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.3)'
+      ctx.beginPath()
+      ctx.ellipse(2, 2, 12, 8, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Body
+      ctx.fillStyle = car.color
+      ctx.beginPath()
+      ctx.moveTo(0, -14)
+      ctx.lineTo(8, -6)
+      ctx.lineTo(10, 10)
+      ctx.lineTo(-10, 10)
+      ctx.lineTo(-8, -6)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Windshield
+      ctx.fillStyle = '#224466'
+      ctx.fillRect(-5, -8, 10, 6)
+      
+      ctx.restore()
+    }
+    
+    const checkCheckpoint = (car: Car) => {
+      const next = track[car.checkpoint % track.length]
+      const dist = Math.sqrt((car.x - next.x) ** 2 + (car.y - next.y) ** 2)
+      if (dist < 40) {
+        car.checkpoint++
+        if (car.checkpoint >= track.length) {
+          car.checkpoint = 0
+          car.lap++
+          if (car.isPlayer) {
+            setLap(car.lap)
+            if (car.lap >= 3) {
+              gameRunning = false
+              setFinished(true)
+              onScore(10000 - opponents.filter(o => o.lap >= 3).length * 1000)
+            }
+          }
+        }
       }
     }
-    
-    const obstacleInterval = setInterval(spawnObstacle, 800)
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') playerX = Math.max(20, playerX - 15)
-      if (e.key === 'ArrowRight') playerX = Math.min(canvas.width - 20, playerX + 15)
-    }
-    
-    window.addEventListener('keydown', handleKeyDown)
     
     const gameLoop = () => {
-      if (gameOver) return
+      if (!gameRunning) return
       
-      // Draw road
-      ctx.fillStyle = '#333'
+      // Background
+      ctx.fillStyle = '#1a3a1a'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      // Road markings
-      ctx.strokeStyle = '#ffff00'
-      ctx.setLineDash([20, 20])
+      // Track
+      ctx.strokeStyle = '#555'
+      ctx.lineWidth = 50
+      ctx.lineCap = 'round'
       ctx.beginPath()
-      ctx.moveTo(canvas.width / 2, (Date.now() / 20) % 40)
-      for (let y = (Date.now() / 20) % 40; y < canvas.height; y += 40) {
-        ctx.lineTo(canvas.width / 2, y)
-      }
+      ctx.moveTo(track[0].x, track[0].y)
+      for (const p of track) ctx.lineTo(p.x, p.y)
+      ctx.lineTo(track[0].x, track[0].y)
+      ctx.stroke()
+      
+      // Track edge
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 2
+      ctx.setLineDash([10, 10])
       ctx.stroke()
       ctx.setLineDash([])
       
-      // Draw player car
-      ctx.fillStyle = '#00aaff'
-      ctx.fillRect(playerX - 15, canvas.height - 60, 30, 50)
-      ctx.fillStyle = '#0088cc'
-      ctx.fillRect(playerX - 10, canvas.height - 55, 20, 15)
-      
-      // Update obstacles
-      obstacles = obstacles.filter(o => {
-        o.y += speed
+      if (raceStarted) {
+        // Player controls
+        if (keys.has('arrowup') || keys.has('w')) player.speed = Math.min(player.speed + 0.15, 5)
+        else if (keys.has('arrowdown') || keys.has('s')) player.speed = Math.max(player.speed - 0.2, -1)
+        else player.speed *= 0.98
         
-        // Draw obstacle
-        ctx.fillStyle = '#ff4444'
-        ctx.fillRect(o.x, o.y, o.width, 40)
+        if (keys.has('arrowleft') || keys.has('a')) player.angle -= 0.05
+        if (keys.has('arrowright') || keys.has('d')) player.angle += 0.05
         
-        // Collision check
-        if (o.y + 40 > canvas.height - 60 && o.y < canvas.height - 10) {
-          if (playerX + 15 > o.x && playerX - 15 < o.x + o.width) {
-            gameOver = true
-            onGameOver()
-            return false
-          }
+        player.x += Math.cos(player.angle) * player.speed
+        player.y += Math.sin(player.angle) * player.speed
+        player.x = Math.max(20, Math.min(canvas.width - 20, player.x))
+        player.y = Math.max(20, Math.min(canvas.height - 20, player.y))
+        checkCheckpoint(player)
+        
+        // AI
+        for (const opp of opponents) {
+          const target = track[opp.checkpoint % track.length]
+          const targetAngle = Math.atan2(target.y - opp.y, target.x - opp.x)
+          let diff = targetAngle - opp.angle
+          while (diff > Math.PI) diff -= Math.PI * 2
+          while (diff < -Math.PI) diff += Math.PI * 2
+          opp.angle += diff * 0.08
+          opp.speed = Math.min(opp.speed + 0.1, 3.5 + Math.random())
+          opp.x += Math.cos(opp.angle) * opp.speed
+          opp.y += Math.sin(opp.angle) * opp.speed
+          checkCheckpoint(opp)
         }
         
-        // Score for passing
-        if (o.y > canvas.height && !gameOver) {
-          gameScore += 10
-          speed = Math.min(15, 5 + gameScore / 100)
-          setScore(gameScore)
-          onScore(gameScore)
-        }
-        
-        return o.y < canvas.height + 50
-      })
+        // Position calc
+        const all = [player, ...opponents].sort((a, b) => (b.lap * 100 + b.checkpoint) - (a.lap * 100 + a.checkpoint))
+        setPosition(all.indexOf(player) + 1)
+      }
       
-      // Draw score
-      ctx.fillStyle = '#ffffff'
-      ctx.font = '20px monospace'
-      ctx.fillText(`Score: ${gameScore}`, 10, 30)
-      ctx.fillText(`Speed: ${speed.toFixed(1)}`, 10, 55)
+      // Draw cars
+      for (const opp of opponents) drawCar(opp)
+      drawCar(player)
       
-      animationId = requestAnimationFrame(gameLoop)
+      // HUD
+      ctx.fillStyle = 'rgba(0,0,0,0.7)'
+      ctx.fillRect(0, 0, canvas.width, 30)
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 14px Arial'
+      ctx.textAlign = 'left'
+      ctx.fillText(`🏁 Lap: ${player.lap + 1}/3`, 10, 20)
+      ctx.fillText(`📍 Position: ${position}/3`, 130, 20)
+      
+      // Countdown
+      if (!raceStarted) {
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = countdown > 0 ? '#f44' : '#4f4'
+        ctx.font = 'bold 80px Arial'
+        ctx.textAlign = 'center'
+        ctx.fillText(countdown > 0 ? countdown.toString() : 'GO!', canvas.width / 2, canvas.height / 2 + 30)
+      }
+      
+      requestAnimationFrame(gameLoop)
     }
     
     gameLoop()
     
     return () => {
-      cancelAnimationFrame(animationId)
-      clearInterval(obstacleInterval)
+      clearInterval(countdownInterval)
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
     }
   }, [onScore, onGameOver])
   
   return (
-    <div className="flex flex-col items-center">
-      <canvas 
-        ref={canvasRef} 
-        width={300} 
-        height={500}
-        className="border-2 border-yellow-500 rounded-lg"
-      />
-      <p className="text-sm text-gray-400 mt-2">Use ← → to dodge obstacles</p>
-    </div>
-  )
-}
-
-// Blackjack Game
-function BlackjackGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
-  const [deck, setDeck] = useState<string[]>([])
-  const [playerHand, setPlayerHand] = useState<string[]>([])
-  const [dealerHand, setDealerHand] = useState<string[]>([])
-  const [gameState, setGameState] = useState<'betting' | 'playing' | 'dealer' | 'done'>('betting')
-  const [chips, setChips] = useState(1000)
-  const [bet, setBet] = useState(100)
-  const [message, setMessage] = useState('')
-  
-  const suits = ['♠️', '♥️', '♦️', '♣️']
-  const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-  
-  const createDeck = () => {
-    const newDeck: string[] = []
-    for (const suit of suits) {
-      for (const value of values) {
-        newDeck.push(`${value}${suit}`)
-      }
-    }
-    return newDeck.sort(() => Math.random() - 0.5)
-  }
-  
-  const getCardValue = (card: string): number => {
-    const value = card.slice(0, -2)
-    if (value === 'A') return 11
-    if (['K', 'Q', 'J'].includes(value)) return 10
-    return parseInt(value)
-  }
-  
-  const getHandValue = (hand: string[]): number => {
-    let value = hand.reduce((sum, card) => sum + getCardValue(card), 0)
-    let aces = hand.filter(card => card.startsWith('A')).length
-    while (value > 21 && aces > 0) {
-      value -= 10
-      aces--
-    }
-    return value
-  }
-  
-  const deal = () => {
-    const newDeck = createDeck()
-    const pHand = [newDeck.pop()!, newDeck.pop()!]
-    const dHand = [newDeck.pop()!, newDeck.pop()!]
-    setDeck(newDeck)
-    setPlayerHand(pHand)
-    setDealerHand(dHand)
-    setGameState('playing')
-    setMessage('')
-    
-    if (getHandValue(pHand) === 21) {
-      setMessage('Blackjack!')
-      setChips(c => c + bet * 1.5)
-      setGameState('done')
-      onScore(chips + bet * 1.5)
-    }
-  }
-  
-  const hit = () => {
-    const newDeck = [...deck]
-    const newHand = [...playerHand, newDeck.pop()!]
-    setDeck(newDeck)
-    setPlayerHand(newHand)
-    
-    if (getHandValue(newHand) > 21) {
-      setMessage('Bust!')
-      setChips(c => c - bet)
-      setGameState('done')
-      if (chips - bet <= 0) onGameOver()
-    }
-  }
-  
-  const stand = () => {
-    setGameState('dealer')
-    let dHand = [...dealerHand]
-    let newDeck = [...deck]
-    
-    while (getHandValue(dHand) < 17) {
-      dHand.push(newDeck.pop()!)
-    }
-    
-    setDealerHand(dHand)
-    setDeck(newDeck)
-    
-    const playerValue = getHandValue(playerHand)
-    const dealerValue = getHandValue(dHand)
-    
-    if (dealerValue > 21 || playerValue > dealerValue) {
-      setMessage('You win!')
-      setChips(c => c + bet)
-      onScore(chips + bet)
-    } else if (dealerValue > playerValue) {
-      setMessage('Dealer wins!')
-      setChips(c => c - bet)
-      if (chips - bet <= 0) onGameOver()
-    } else {
-      setMessage('Push!')
-    }
-    
-    setGameState('done')
-  }
-  
-  return (
-    <div className="flex flex-col items-center p-4 bg-green-800 rounded-xl min-w-[350px]">
-      <div className="text-white mb-4">Chips: ${chips} | Bet: ${bet}</div>
-      
-      {gameState === 'betting' && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-2">
-            {[50, 100, 200, 500].map(amount => (
-              <button
-                key={amount}
-                onClick={() => setBet(amount)}
-                className={`px-4 py-2 rounded ${bet === amount ? 'bg-yellow-500' : 'bg-gray-600'}`}
-              >
-                ${amount}
-              </button>
-            ))}
+    <div className="relative">
+      <canvas ref={canvasRef} width={430} height={350} className="rounded-xl border-2 border-yellow-500/50 shadow-lg shadow-yellow-500/20" />
+      {finished && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-green-500 mb-2">🏁 RACE COMPLETE!</h2>
+            <p className="text-xl text-white mb-4">Position: {position}/3</p>
+            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-yellow-600 rounded-lg text-white font-bold hover:bg-yellow-500">
+              🏎️ RACE AGAIN
+            </button>
           </div>
-          <button onClick={deal} className="px-6 py-3 bg-blue-600 rounded-lg font-bold">
-            Deal
-          </button>
         </div>
       )}
-      
-      {(gameState === 'playing' || gameState === 'dealer' || gameState === 'done') && (
-        <>
-          <div className="mb-4">
-            <p className="text-white text-sm mb-1">Dealer: {gameState === 'playing' ? '?' : getHandValue(dealerHand)}</p>
-            <div className="flex gap-2">
-              {dealerHand.map((card, i) => (
-                <div key={i} className="w-12 h-16 bg-white rounded flex items-center justify-center text-lg">
-                  {i === 1 && gameState === 'playing' ? '🂠' : card}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <p className="text-white text-sm mb-1">You: {getHandValue(playerHand)}</p>
-            <div className="flex gap-2">
-              {playerHand.map((card, i) => (
-                <div key={i} className="w-12 h-16 bg-white rounded flex items-center justify-center text-lg">
-                  {card}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {message && <p className="text-2xl font-bold text-yellow-400 mb-4">{message}</p>}
-          
-          {gameState === 'playing' && (
-            <div className="flex gap-4">
-              <button onClick={hit} className="px-6 py-2 bg-green-600 rounded-lg">Hit</button>
-              <button onClick={stand} className="px-6 py-2 bg-red-600 rounded-lg">Stand</button>
-            </div>
-          )}
-          
-          {gameState === 'done' && (
-            <button onClick={() => setGameState('betting')} className="px-6 py-2 bg-blue-600 rounded-lg">
-              New Hand
-            </button>
-          )}
-        </>
-      )}
+      <p className="text-center text-gray-400 text-sm mt-2">Arrow Keys/WASD to drive • Complete 3 laps</p>
     </div>
   )
 }
 
-// Trivia Game
-function TriviaGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
-  const questions = [
-    { q: 'What planet is known as the Red Planet?', answers: ['Mars', 'Venus', 'Jupiter', 'Saturn'], correct: 0 },
-    { q: 'What is the largest ocean on Earth?', answers: ['Atlantic', 'Indian', 'Pacific', 'Arctic'], correct: 2 },
-    { q: 'How many continents are there?', answers: ['5', '6', '7', '8'], correct: 2 },
-    { q: 'What is the capital of France?', answers: ['London', 'Berlin', 'Madrid', 'Paris'], correct: 3 },
-    { q: 'What is H2O commonly known as?', answers: ['Salt', 'Water', 'Sugar', 'Oil'], correct: 1 },
-    { q: 'Who painted the Mona Lisa?', answers: ['Van Gogh', 'Picasso', 'Da Vinci', 'Monet'], correct: 2 },
-    { q: 'What is the largest mammal?', answers: ['Elephant', 'Blue Whale', 'Giraffe', 'Hippo'], correct: 1 },
-    { q: 'How many legs does a spider have?', answers: ['6', '8', '10', '12'], correct: 1 },
-    { q: 'What year did WW2 end?', answers: ['1943', '1944', '1945', '1946'], correct: 2 },
-    { q: 'What is the hardest natural substance?', answers: ['Gold', 'Iron', 'Diamond', 'Platinum'], correct: 2 },
-  ]
-  
-  const [currentQ, setCurrentQ] = useState(0)
-  const [score, setScore] = useState(0)
-  const [showResult, setShowResult] = useState<'correct' | 'wrong' | null>(null)
-  const [gameEnded, setGameEnded] = useState(false)
-  
-  const handleAnswer = (index: number) => {
-    if (showResult) return
-    
-    if (index === questions[currentQ].correct) {
-      setShowResult('correct')
-      const newScore = score + 100
-      setScore(newScore)
-      onScore(newScore)
-    } else {
-      setShowResult('wrong')
-    }
-    
-    setTimeout(() => {
-      if (currentQ < questions.length - 1) {
-        setCurrentQ(c => c + 1)
-        setShowResult(null)
-      } else {
-        setGameEnded(true)
-        onGameOver()
-      }
-    }, 1000)
-  }
-  
-  if (gameEnded) {
-    return (
-      <div className="text-center p-8">
-        <h3 className="text-2xl font-bold text-white mb-4">Game Over!</h3>
-        <p className="text-xl text-green-400">Final Score: {score}/{questions.length * 100}</p>
-      </div>
-    )
-  }
-  
-  return (
-    <div className="flex flex-col items-center p-4 max-w-md">
-      <div className="text-white mb-2">Question {currentQ + 1}/{questions.length}</div>
-      <div className="text-xl text-white mb-6 text-center">{questions[currentQ].q}</div>
-      
-      <div className="grid grid-cols-2 gap-3 w-full">
-        {questions[currentQ].answers.map((answer, i) => (
-          <button
-            key={i}
-            onClick={() => handleAnswer(i)}
-            className={`p-4 rounded-lg text-white font-medium transition-all ${
-              showResult
-                ? i === questions[currentQ].correct
-                  ? 'bg-green-600'
-                  : showResult === 'wrong' && i !== questions[currentQ].correct
-                    ? 'bg-red-600'
-                    : 'bg-gray-600'
-                : 'bg-blue-600 hover:bg-blue-500'
-            }`}
-          >
-            {answer}
-          </button>
-        ))}
-      </div>
-      
-      <div className="mt-4 text-white">Score: {score}</div>
-    </div>
-  )
-}
+// Game Categories
+const GAME_CATEGORIES = [
+  {
+    id: 'action',
+    name: 'Action/Arcade',
+    icon: '🎯',
+    color: 'from-red-600 to-orange-500',
+    description: 'Fast reflexes, retro-modern gameplay',
+    games: [
+      { id: 'space-shooter', name: 'Space Commander', difficulty: 3, icon: '🚀', playable: true },
+      { id: 'brick-breaker', name: 'Brick Breaker', difficulty: 2, icon: '🧱', playable: false },
+      { id: 'asteroid-dodge', name: 'Asteroid Dodge', difficulty: 4, icon: '☄️', playable: false },
+      { id: 'ninja-jump', name: 'Ninja Jump', difficulty: 5, icon: '🥷', playable: false },
+      { id: 'zombie-wave', name: 'Zombie Wave', difficulty: 6, icon: '🧟', playable: false },
+    ]
+  },
+  {
+    id: 'strategy',
+    name: 'Strategy/Tactical',
+    icon: '♟️',
+    color: 'from-blue-600 to-indigo-500',
+    description: 'Chess-like, tower defense, planning',
+    games: [
+      { id: 'tower-defense', name: 'Tower Command', difficulty: 4, icon: '🏰', playable: true },
+      { id: 'chess-lite', name: 'Chess Lite', difficulty: 3, icon: '♔', playable: false },
+      { id: 'hex-conquest', name: 'Hex Conquest', difficulty: 6, icon: '⬡', playable: false },
+      { id: 'kingdom-builder', name: 'Kingdom Builder', difficulty: 5, icon: '👑', playable: false },
+      { id: 'battle-tactics', name: 'Battle Tactics', difficulty: 7, icon: '⚔️', playable: false },
+    ]
+  },
+  {
+    id: 'puzzle',
+    name: 'Puzzle/Brain',
+    icon: '🧩',
+    color: 'from-purple-600 to-pink-500',
+    description: 'Logic, matching, escape rooms',
+    games: [
+      { id: 'match-3', name: 'Gem Crusher', difficulty: 2, icon: '💎', playable: true },
+      { id: 'sudoku', name: 'Sudoku Master', difficulty: 4, icon: '9️⃣', playable: false },
+      { id: 'word-search', name: 'Word Search', difficulty: 3, icon: '🔤', playable: false },
+      { id: 'escape-room', name: 'Escape Room', difficulty: 6, icon: '🚪', playable: false },
+      { id: 'code-breaker', name: 'Code Breaker', difficulty: 7, icon: '🔐', playable: false },
+    ]
+  },
+  {
+    id: 'racing',
+    name: 'Racing/Sports',
+    icon: '🏁',
+    color: 'from-green-600 to-emerald-500',
+    description: 'Speed, competition, athletics',
+    games: [
+      { id: 'speed-racer', name: 'Speed Rush', difficulty: 3, icon: '🏎️', playable: true },
+      { id: 'bike-sprint', name: 'Bike Sprint', difficulty: 2, icon: '🚴', playable: false },
+      { id: 'soccer-kick', name: 'Soccer Kick', difficulty: 4, icon: '⚽', playable: false },
+      { id: 'basketball-shoot', name: 'Basketball', difficulty: 3, icon: '🏀', playable: false },
+      { id: 'golf-master', name: 'Golf Master', difficulty: 5, icon: '⛳', playable: false },
+    ]
+  },
+]
 
-// Idle Clicker Game
-function IdleClickerGame({ onScore, onGameOver }: { onScore: (s: number) => void, onGameOver: () => void }) {
-  const [coins, setCoins] = useState(0)
-  const [clickPower, setClickPower] = useState(1)
-  const [autoClickers, setAutoClickers] = useState(0)
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (autoClickers > 0) {
-        setCoins(c => {
-          const newCoins = c + autoClickers
-          onScore(newCoins)
-          return newCoins
-        })
-      }
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [autoClickers, onScore])
-  
-  const handleClick = () => {
-    setCoins(c => {
-      const newCoins = c + clickPower
-      onScore(newCoins)
-      return newCoins
-    })
-  }
-  
-  const buyClickPower = () => {
-    const cost = clickPower * 50
-    if (coins >= cost) {
-      setCoins(c => c - cost)
-      setClickPower(p => p + 1)
-    }
-  }
-  
-  const buyAutoClicker = () => {
-    const cost = (autoClickers + 1) * 100
-    if (coins >= cost) {
-      setCoins(c => c - cost)
-      setAutoClickers(a => a + 1)
-    }
-  }
-  
-  return (
-    <div className="flex flex-col items-center p-4">
-      <div className="text-4xl font-bold text-yellow-400 mb-4">💰 {coins.toLocaleString()}</div>
-      
-      <button
-        onClick={handleClick}
-        className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full text-4xl 
-                   shadow-lg hover:scale-110 active:scale-95 transition-transform mb-6"
-      >
-        🪙
-      </button>
-      
-      <div className="text-white mb-4">
-        Click Power: {clickPower} | Auto: {autoClickers}/sec
-      </div>
-      
-      <div className="flex gap-4">
-        <button
-          onClick={buyClickPower}
-          disabled={coins < clickPower * 50}
-          className="px-4 py-2 bg-blue-600 rounded-lg disabled:opacity-50"
-        >
-          +1 Power (💰{clickPower * 50})
-        </button>
-        <button
-          onClick={buyAutoClicker}
-          disabled={coins < (autoClickers + 1) * 100}
-          className="px-4 py-2 bg-green-600 rounded-lg disabled:opacity-50"
-        >
-          Auto Clicker (💰{(autoClickers + 1) * 100})
-        </button>
-      </div>
-    </div>
-  )
-}
+// External Gaming Resources
+const EXTERNAL_RESOURCES = [
+  {
+    category: 'Gaming Challenges',
+    links: [
+      { name: 'LostGamer.io', url: 'https://lostgamer.io', description: 'GeoGuessr for video games', icon: '🗺️' },
+      { name: 'Neal.fun', url: 'https://neal.fun', description: 'Educational games & experiments', icon: '🎮' },
+    ]
+  },
+  {
+    category: 'Classic Games Portal',
+    links: [
+      { name: 'Emupedia.net', url: 'https://emupedia.net', description: 'Windows 95/98 classics', icon: '💾' },
+      { name: 'PlayRetroGames', url: 'https://playretrogames.online', description: 'Console classics', icon: '🕹️' },
+    ]
+  },
+  {
+    category: 'Browser MMORPG',
+    links: [
+      { name: 'Hordes.io', url: 'https://hordes.io', description: 'Free 3D browser MMORPG', icon: '⚔️' },
+    ]
+  },
+  {
+    category: 'Gaming Resources',
+    links: [
+      { name: 'Modrinth', url: 'https://modrinth.com', description: 'Minecraft mods', icon: '🔧' },
+      { name: 'GrabCraft', url: 'https://grabcraft.com', description: 'Minecraft blueprints', icon: '🏗️' },
+      { name: 'CheapShark', url: 'https://cheapshark.com', description: 'PC game deals', icon: '💰' },
+    ]
+  },
+  {
+    category: 'Game Dev Assets',
+    links: [
+      { name: 'Kenney.nl', url: 'https://kenney.nl', description: '40K+ free game assets', icon: '🎨' },
+      { name: 'Poly Haven', url: 'https://polyhaven.com', description: 'Free 3D models', icon: '🖼️' },
+      { name: 'Freesound', url: 'https://freesound.org', description: '500K+ sound effects', icon: '🔊' },
+    ]
+  },
+]
 
-// =============================================================================
-// MAIN GAMES HUB PAGE
-// =============================================================================
-
-export default function GamesHubPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+// Main Hub Component
+export default function GamesHub() {
   const [currentGame, setCurrentGame] = useState<{ categoryId: string; gameId: string } | null>(null)
   const [score, setScore] = useState(0)
-  const [showExternal, setShowExternal] = useState(false)
+  const [activeTab, setActiveTab] = useState<'games' | 'resources'>('games')
   
   const handleGameOver = () => {
-    // Could save score, show leaderboard, etc.
+    // Game over handling
   }
   
   const renderGame = () => {
     if (!currentGame) return null
     
-    const gameKey = `${currentGame.categoryId}-${currentGame.gameId}`
-    
-    // Map games to their components
     const gameComponents: Record<string, JSX.Element> = {
       'action-space-shooter': <SpaceShooterGame onScore={setScore} onGameOver={handleGameOver} />,
+      'strategy-tower-defense': <TowerDefenseGame onScore={setScore} onGameOver={handleGameOver} />,
       'puzzle-match-3': <Match3Game onScore={setScore} onGameOver={handleGameOver} />,
-      'strategy-tower-defense-basic': <TowerDefenseGame onScore={setScore} onGameOver={handleGameOver} />,
-      'cards-memory-match': <MemoryMatchGame onScore={setScore} onGameOver={handleGameOver} />,
-      'racing-simple-race': <SimpleRaceGame onScore={setScore} onGameOver={handleGameOver} />,
-      'cards-blackjack': <BlackjackGame onScore={setScore} onGameOver={handleGameOver} />,
-      'multiplayer-trivia-battle': <TriviaGame onScore={setScore} onGameOver={handleGameOver} />,
-      'simulation-lemonade-stand': <IdleClickerGame onScore={setScore} onGameOver={handleGameOver} />,
+      'racing-speed-racer': <RacingGame onScore={setScore} onGameOver={handleGameOver} />,
     }
     
-    return gameComponents[gameKey] || (
-      <div className="text-center p-8">
-        <div className="text-6xl mb-4">🎮</div>
-        <h3 className="text-xl text-white mb-2">Game Coming Soon!</h3>
-        <p className="text-gray-400">This game is under development.</p>
-        <button
-          onClick={() => setCurrentGame(null)}
-          className="mt-4 px-6 py-2 bg-blue-600 rounded-lg"
-        >
-          Back to Games
-        </button>
+    const key = `${currentGame.categoryId}-${currentGame.gameId}`
+    return gameComponents[key] || (
+      <div className="text-center py-20">
+        <p className="text-6xl mb-4">🎮</p>
+        <h3 className="text-2xl font-bold text-white mb-2">Coming Soon!</h3>
+        <p className="text-gray-400">This game is under development</p>
       </div>
     )
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
-      <header className="bg-black/50 backdrop-blur-lg border-b border-white/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">🎮</span>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              CR Games Hub
-            </span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-white">Score: {score.toLocaleString()}</span>
-            <button
-              onClick={() => setShowExternal(!showExternal)}
-              className="px-4 py-2 bg-purple-600 rounded-lg text-white text-sm"
-            >
-              {showExternal ? 'Our Games' : 'Gaming Resources'}
-            </button>
+      <header className="bg-black/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-3xl">🎮</span>
+              <div>
+                <h1 className="text-xl font-bold text-white">CR Games Hub</h1>
+                <p className="text-xs text-gray-400">100+ Games • Play & Create</p>
+              </div>
+            </Link>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('games')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'games' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                🎯 Games
+              </button>
+              <button
+                onClick={() => setActiveTab('resources')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'resources' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                🔗 Resources
+              </button>
+            </div>
           </div>
         </div>
       </header>
       
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Current Game View */}
-        {currentGame && (
-          <div className="mb-8">
-            <button
-              onClick={() => setCurrentGame(null)}
-              className="mb-4 text-gray-400 hover:text-white flex items-center gap-2"
-            >
-              ← Back to Games
-            </button>
-            <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 flex justify-center">
-              {renderGame()}
-            </div>
-          </div>
-        )}
-        
-        {/* External Resources View */}
-        {showExternal && !currentGame && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">🌐 Gaming Resources</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {EXTERNAL_RESOURCES.map((category) => (
-                <div key={category.category} className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                  <h3 className="text-lg font-bold text-purple-400 mb-4">{category.category}</h3>
-                  <div className="space-y-3">
-                    {category.links.map((link) => (
-                      <a
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        <span className="text-2xl">{link.icon}</span>
-                        <div>
-                          <div className="text-white font-medium">{link.name}</div>
-                          <div className="text-sm text-gray-400">{link.description}</div>
-                        </div>
-                        <span className="ml-auto text-gray-500">↗</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Games Grid */}
-        {!currentGame && !showExternal && (
+        {activeTab === 'games' ? (
           <>
-            {/* Hero */}
-            <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent mb-4">
-                100+ Games
-              </h1>
-              <p className="text-xl text-gray-400">10 Categories • All Difficulty Levels • Play Free</p>
-            </div>
+            {/* Game Display Area */}
+            {currentGame && (
+              <div className="mb-8 bg-gray-800/50 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+                    <p className="text-gray-400">Score: {score}</p>
+                  </div>
+                  <button
+                    onClick={() => setCurrentGame(null)}
+                    className="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-all"
+                  >
+                    ✕ Close Game
+                  </button>
+                </div>
+                <div className="flex justify-center">
+                  {renderGame()}
+                </div>
+              </div>
+            )}
             
-            {/* Category Selector */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-full transition-all ${
-                  !selectedCategory ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                All Games
-              </button>
-              {GAME_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full transition-all ${
-                    selectedCategory === cat.id ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  {cat.icon} {cat.name}
-                </button>
-              ))}
-            </div>
-            
-            {/* Games by Category */}
-            {GAME_CATEGORIES
-              .filter(cat => !selectedCategory || cat.id === selectedCategory)
-              .map((category) => (
-                <div key={category.id} className="mb-12">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-3xl">{category.icon}</span>
+            {/* Game Categories */}
+            <div className="space-y-8">
+              {GAME_CATEGORIES.map((category) => (
+                <div key={category.id} className="bg-gray-800/30 rounded-2xl p-6">
+                  <div className={`flex items-center gap-3 mb-4 bg-gradient-to-r ${category.color} bg-clip-text`}>
+                    <span className="text-4xl">{category.icon}</span>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">{category.name}</h2>
-                      <p className="text-gray-400">{category.description}</p>
+                      <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-white to-gray-300 bg-clip-text">
+                        {category.name}
+                      </h2>
+                      <p className="text-gray-400 text-sm">{category.description}</p>
                     </div>
                   </div>
                   
-                  <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {category.games.map((game) => (
                       <button
                         key={game.id}
-                        onClick={() => setCurrentGame({ categoryId: category.id, gameId: game.id })}
-                        className={`bg-gradient-to-br ${category.color} p-4 rounded-xl text-left hover:scale-105 transition-transform`}
+                        onClick={() => game.playable && setCurrentGame({ categoryId: category.id, gameId: game.id })}
+                        className={`p-4 rounded-xl transition-all ${
+                          game.playable
+                            ? `bg-gradient-to-br ${category.color} hover:scale-105 hover:shadow-lg cursor-pointer`
+                            : 'bg-gray-700/50 opacity-60 cursor-not-allowed'
+                        }`}
                       >
-                        <div className="text-3xl mb-2">{game.icon}</div>
-                        <div className="text-white font-semibold">{game.name}</div>
-                        <div className="flex gap-1 mt-2">
-                          {[...Array(10)].map((_, i) => (
-                            <div
-                              key={i}
-                              className={`w-2 h-2 rounded-full ${
-                                i < game.difficulty ? 'bg-white' : 'bg-white/30'
-                              }`}
-                            />
+                        <span className="text-4xl block mb-2">{game.icon}</span>
+                        <h3 className="font-bold text-white text-sm">{game.name}</h3>
+                        <div className="flex items-center justify-center gap-1 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <span key={i} className={`text-xs ${i < game.difficulty ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
                           ))}
                         </div>
+                        {!game.playable && (
+                          <span className="text-xs text-gray-400 mt-1 block">Coming Soon</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
               ))}
+            </div>
           </>
+        ) : (
+          /* External Resources */
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">🔗 Gaming Resources</h2>
+              <p className="text-gray-400">Curated links to gaming sites, assets, and tools</p>
+            </div>
+            
+            {EXTERNAL_RESOURCES.map((section) => (
+              <div key={section.category} className="bg-gray-800/30 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">{section.category}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {section.links.map((link) => (
+                    <a
+                      key={link.name}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-all group"
+                    >
+                      <span className="text-3xl">{link.icon}</span>
+                      <div>
+                        <h4 className="font-bold text-white group-hover:text-purple-400 transition-colors">
+                          {link.name} ↗
+                        </h4>
+                        <p className="text-sm text-gray-400">{link.description}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </main>
       
       {/* Footer */}
-      <footer className="bg-black/50 border-t border-white/10 py-8 mt-12">
+      <footer className="bg-black/50 border-t border-gray-700 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-gray-400">
-            © 2025 CR AudioViz AI, LLC • 100 Games • 10 Categories • Endless Fun
+            🎮 CR AudioViz AI Games Hub • Play, Create, Share
           </p>
-          <div className="flex justify-center gap-6 mt-4">
+          <div className="flex justify-center gap-4 mt-2 text-sm">
             <Link href="/" className="text-gray-500 hover:text-white">Home</Link>
             <Link href="/apps" className="text-gray-500 hover:text-white">Apps</Link>
             <Link href="/pricing" className="text-gray-500 hover:text-white">Pricing</Link>
