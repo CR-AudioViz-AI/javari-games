@@ -58,7 +58,8 @@
     "react-day-picker": "^9.7.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.2",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
