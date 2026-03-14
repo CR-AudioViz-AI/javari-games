@@ -1,18 +1,39 @@
 {
   "name": "javari-games",
-  "description": "Javari Games Platform \u2014 games.craudiovizai.com",
-  "dependencies": {
-    "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.57.4",
-    "lucide-react": "^0.344.0",
-    "framer-motion": "^11.18.2",
-    "zustand": "^4.5.7",
-    "nanoid": "^5.1.6",
-    "zod": "^4.3.6"
-  },
+  "version": "1.0.0",
+  "description": "Javari Games Platform — games.craudiovizai.com",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "next start"
+    "dev":       "next dev",
+    "build":     "next build",
+    "start":     "next start",
+    "lint":      "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/ssr":          "^0.6.1",
+    "@supabase/supabase-js":  "^2.57.4",
+    "clsx":                   "^2.1.1",
+    "framer-motion":          "^11.18.2",
+    "lucide-react":           "^0.344.0",
+    "nanoid":                 "^5.1.6",
+    "next":                   "^14.2.35",
+    "react":                  "^18.3.1",
+    "react-dom":              "^18.3.1",
+    "tailwind-merge":         "^2.6.0",
+    "zod":                    "^4.3.6",
+    "zustand":                "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/node":            "^20.14.0",
+    "@types/react":           "^18.3.5",
+    "@types/react-dom":       "^18.3.0",
+    "autoprefixer":           "^10.4.24",
+    "eslint":                 "^8.57.0",
+    "eslint-config-next":     "^14.2.35",
+    "postcss":                "^8.4.35",
+    "tailwindcss":            "^3.4.1",
+    "typescript":             "^5.5.3"
   }
 }
