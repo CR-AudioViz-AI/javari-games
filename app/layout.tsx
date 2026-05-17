@@ -6,6 +6,9 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
+import EcosystemNav from '@/components/ecosystem/EcosystemNav'
+import EcosystemFooter from '@/components/ecosystem/EcosystemFooter'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className={`${inter.className} min-h-screen bg-background`}>
-        {children}
+        <EcosystemNav appName="Javari Games" />{children}<EcosystemFooter />
         {/* Javari AI widget — platform standard */}
         <Script src="https://javariai.com/embed.js" strategy="lazyOnload" />
       </body>
