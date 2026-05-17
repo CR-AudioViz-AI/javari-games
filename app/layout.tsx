@@ -1,45 +1,33 @@
-// app/layout.tsx
-// javari-games — Root layout with Javari platform integration
-// Saturday, March 14, 2026
-
-import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import Script from 'next/script'
+// app/layout.tsx — Javari Games
+// Fortune 50 quality — uses AppShell for full ecosystem integration
+// May 17, 2026 — CR AudioViz AI, LLC
+import type { Metadata } from 'next'
 import './globals.css'
-import EcosystemNav from '@/components/ecosystem/EcosystemNav'
-import EcosystemFooter from '@/components/ecosystem/EcosystemFooter'
-
-
-const inter = Inter({ subsets: ['latin'] })
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Javari Games | CR AudioViz AI',
-  description: 'Comprehensive games platform — part of the CR AudioViz AI ecosystem. Browse, play, and compete across an extensive collection of games.',
-  keywords: ['games', 'online games', 'CR AudioViz AI', 'Javari', 'browser games'],
-  openGraph: {
-    title: 'Javari Games',
-    description: 'Comprehensive games platform by CR AudioViz AI',
-    siteName: 'CR AudioViz AI',
-  },
+  title: 'Javari Games | Javari by CR AudioViz AI',
+  description: 'AI gaming hub and community',
+  keywords: 'Javari Games, Javari, AI, CR AudioViz AI',
 }
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-}
+import AppShell from '@/components/AppShell'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <meta name="format-detection" content="telephone=no" />
-      </head>
-      <body className={`${inter.className} min-h-screen bg-background`}>
-        <EcosystemNav appName="Javari Games" />{children}<EcosystemFooter />
-        {/* Javari AI widget — platform standard */}
-        <Script src="https://javariai.com/embed.js" strategy="lazyOnload" />
+      <body style={{ margin: 0, padding: 0 }}>
+        <AppShell
+          appName="Javari Games"
+          appColor="#a855f7"
+          appEmoji="🎮"
+          appDesc="AI gaming hub and community"
+      handoffApp="Javariverse"
+      handoffUrl="https://javariverse.com"
+      handoffPitch="Join the Javariverse — our virtual world →"
+        >
+          {children}
+        </AppShell>
       </body>
     </html>
   )
