@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function UpsellSidebar({ className='' }) {
   const items = [
     { title: 'CRAudioVizAI Games AI — Pro', href: '/pricing#pro' },
-    { title: 'CRAIverse — Early Access', href: '/craiverse' },
+    { title: 'Javariverse — Early Access', href: '/javariverse' },
     { title: 'Courses & Ebooks', href: '/ebooks' },
     { title: 'Newsletter (Free)', href: '/rss' },
   ];

@@ -78,7 +78,7 @@ export default function GameDiscoveryHub() {
             <Gamepad2 className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">CRAV Games Hub</h1>
+            <h1 className="text-2xl font-bold text-white">javari Javari Games</h1>
             <p className="text-pink-200">Discover and play an extensive collection of games</p>
           </div>
         </div>

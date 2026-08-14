@@ -533,7 +533,7 @@ export function CardDiscoveryProvider({ children }: { children: React.ReactNode 
   const [discoveredCard, setDiscoveredCard] = useState<HiddenCard | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('crav-games-card-progress');
+    const saved = localStorage.getItem('javari-games-card-progress');
     if (saved) {
       try {
         setUserProgress(JSON.parse(saved));
@@ -544,7 +544,7 @@ export function CardDiscoveryProvider({ children }: { children: React.ReactNode 
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('crav-games-card-progress', JSON.stringify(userProgress));
+    localStorage.setItem('javari-games-card-progress', JSON.stringify(userProgress));
   }, [userProgress]);
 
   const hasDiscovered = useCallback((cardId: string) => {
@@ -941,8 +941,8 @@ export function useGameCardTriggers() {
   }, [discoverCard, hasDiscovered]);
 
   const trackGameStart = useCallback(() => {
-    const gamesPlayed = parseInt(localStorage.getItem('crav-games-played') || '0') + 1;
-    localStorage.setItem('crav-games-played', gamesPlayed.toString());
+    const gamesPlayed = parseInt(localStorage.getItem('javari-games-played') || '0') + 1;
+    localStorage.setItem('javari-games-played', gamesPlayed.toString());
 
     if (gamesPlayed === 1 && !hasDiscovered('player-001')) {
       discoverCard('player-001', 'first-game');
@@ -953,8 +953,8 @@ export function useGameCardTriggers() {
   }, [discoverCard, hasDiscovered]);
 
   const trackScore = useCallback((points: number) => {
-    const totalScore = parseInt(localStorage.getItem('crav-games-total-score') || '0') + points;
-    localStorage.setItem('crav-games-total-score', totalScore.toString());
+    const totalScore = parseInt(localStorage.getItem('javari-games-total-score') || '0') + points;
+    localStorage.setItem('javari-games-total-score', totalScore.toString());
 
     if (totalScore >= 1000 && !hasDiscovered('score-001')) {
       discoverCard('score-001', 'score-1000');
@@ -965,8 +965,8 @@ export function useGameCardTriggers() {
   }, [discoverCard, hasDiscovered]);
 
   const trackStreak = useCallback(() => {
-    const lastPlay = localStorage.getItem('crav-games-last-play');
-    const streak = parseInt(localStorage.getItem('crav-games-streak') || '0');
+    const lastPlay = localStorage.getItem('javari-games-last-play');
+    const streak = parseInt(localStorage.getItem('javari-games-streak') || '0');
     const today = new Date().toDateString();
     
     if (lastPlay !== today) {
@@ -975,7 +975,7 @@ export function useGameCardTriggers() {
       
       if (lastPlay === yesterday.toDateString()) {
         const newStreak = streak + 1;
-        localStorage.setItem('crav-games-streak', newStreak.toString());
+        localStorage.setItem('javari-games-streak', newStreak.toString());
         
         if (!hasDiscovered('daily-001')) discoverCard('daily-001', 'daily-play');
         if (newStreak >= 3 && !hasDiscovered('daily-002')) discoverCard('daily-002', 'streak-3');
@@ -983,10 +983,10 @@ export function useGameCardTriggers() {
         if (newStreak >= 14 && !hasDiscovered('daily-004')) discoverCard('daily-004', 'streak-14');
         if (newStreak >= 30 && !hasDiscovered('daily-005')) discoverCard('daily-005', 'streak-30');
       } else {
-        localStorage.setItem('crav-games-streak', '1');
+        localStorage.setItem('javari-games-streak', '1');
         if (!hasDiscovered('daily-001')) discoverCard('daily-001', 'daily-play');
       }
-      localStorage.setItem('crav-games-last-play', today);
+      localStorage.setItem('javari-games-last-play', today);
     }
   }, [discoverCard, hasDiscovered]);
 

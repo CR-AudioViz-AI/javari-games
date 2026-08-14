@@ -49,7 +49,7 @@ const COMMUNITY_POSTS: Post[] = [
   {
     id: '1',
     author: { name: 'CreativeArtist', avatar: '🎨', level: 28, badge: '⭐' },
-    content: 'Just finished my latest digital artwork using CRAV tools! The AI assistance made the whole process so smooth. What do you all think? 🎨✨',
+    content: 'Just finished my latest digital artwork using javari tools! The AI assistance made the whole process so smooth. What do you all think? 🎨✨',
     likes: 234,
     comments: 45,
     shares: 12,

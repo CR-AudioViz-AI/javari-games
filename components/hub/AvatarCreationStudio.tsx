@@ -145,7 +145,7 @@ export default function AvatarCreationStudio() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Avatar Creation Studio</h1>
-            <p className="text-violet-200">Design your unique CRAIverse identity</p>
+            <p className="text-violet-200">Design your unique Javariverse identity</p>
           </div>
         </div>
       </div>

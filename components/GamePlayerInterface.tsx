@@ -53,7 +53,7 @@ interface RelatedGame {
 const SAMPLE_GAME: GameData = {
   id: '1',
   title: 'Neon Runner',
-  developer: 'CRAV Studios',
+  developer: 'javari Studios',
   category: 'Action',
   rating: 4.8,
   totalRatings: 12500,

@@ -40,7 +40,7 @@ interface UserProfile {
 }
 
 const VIRTUAL_SPACES: VirtualSpace[] = [
-  { id: '1', name: 'Central Plaza', icon: '🏛️', type: 'community', description: 'The main gathering hub of CRAIverse', members: 15420, activeNow: 342, featured: true, premium: false },
+  { id: '1', name: 'Central Plaza', icon: '🏛️', type: 'community', description: 'The main gathering hub of Javariverse', members: 15420, activeNow: 342, featured: true, premium: false },
   { id: '2', name: 'Creator Studio', icon: '🎨', type: 'business', description: 'Showcase your creative work', members: 8900, activeNow: 156, featured: true, premium: false },
   { id: '3', name: 'Gaming Arena', icon: '🎮', type: 'entertainment', description: 'Competitive gaming tournaments', members: 12300, activeNow: 567, featured: true, premium: false },
   { id: '4', name: 'Learning Center', icon: '📚', type: 'education', description: 'Workshops and skill development', members: 6780, activeNow: 89, featured: false, premium: false },
@@ -104,7 +104,7 @@ export default function VirtualWorldHub() {
               <Globe className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">CRAIverse</h1>
+              <h1 className="text-2xl font-bold text-white">Javariverse</h1>
               <p className="text-purple-200">Your virtual world awaits</p>
             </div>
           </div>

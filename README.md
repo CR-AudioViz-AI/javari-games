@@ -1,4 +1,4 @@
-# crav-games
+# javari-games
 
 CR AudioViz AI Platform
 

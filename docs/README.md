@@ -23,8 +23,8 @@ A comprehensive collection of 25+ micro-games with premium features, monetizatio
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/craudioviz/crav-games-pack.git
-cd crav-games-pack
+git clone https://github.com/craudioviz/javari-games-pack.git
+cd javari-games-pack
 ```
 
 2. Install dependencies:
@@ -197,8 +197,8 @@ npm run start
 ### Docker
 
 ```bash
-docker build -t crav-games-pack .
-docker run -p 3000:3000 crav-games-pack
+docker build -t javari-games-pack .
+docker run -p 3000:3000 javari-games-pack
 ```
 
 ## 🧪 Testing

@@ -8,7 +8,7 @@ import { ArrowLeft, RotateCcw, Trophy, Star, Timer, Zap } from 'lucide-react'
 // POKÉMON CARD MEMORY MATCH
 // CR AudioViz AI Games - Uses FREE Pokemon TCG API
 // Features: Real card images, difficulty levels, scoring, achievements
-// Can be embedded in: games.craudiovizai.com AND CravCards app
+// Can be embedded in: games.craudiovizai.com AND Javari Cards app
 // =============================================================================
 
 interface PokemonCard {

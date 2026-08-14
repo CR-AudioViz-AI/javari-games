@@ -8,7 +8,7 @@ import { ArrowLeft, Trophy, Star, Timer, BookOpen, Check, X, Lightbulb } from 'l
 // SPIRITS HISTORY TRIVIA
 // CR AudioViz AI Games - Alcohol History & Knowledge
 // Features: Prohibition era, distilling history, spirits knowledge
-// Can be embedded in: games.craudiovizai.com AND CravBarrels app
+// Can be embedded in: games.craudiovizai.com AND Javari Spirits app
 // =============================================================================
 
 interface TriviaQuestion {
@@ -595,7 +595,7 @@ export default function SpiritsHistoryTrivia() {
       <footer className="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm border-t border-white/10 py-3">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-white/60 text-sm">
           <span>Learn while you play!</span>
-          <span>CR AudioViz AI Games • CRAVBarrels</span>
+          <span>CR AudioViz AI Games • Javari Spirits</span>
         </div>
       </footer>
     </div>

@@ -8,7 +8,7 @@ import { ArrowLeft, Trophy, Star, Timer, Zap, Target, TrendingUp } from 'lucide-
 // CARD COLLECTOR CHALLENGE
 // CR AudioViz AI Games - Uses FREE Scryfall API (Magic: The Gathering)
 // Features: Price guessing, rarity challenges, card identification
-// Can be embedded in: games.craudiovizai.com AND CravCards app
+// Can be embedded in: games.craudiovizai.com AND Javari Cards app
 // =============================================================================
 
 interface MTGCard {
@@ -540,7 +540,7 @@ export default function CardCollectorChallenge() {
       <footer className="fixed bottom-0 left-0 right-0 bg-black/30 backdrop-blur-sm border-t border-white/10 py-3">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-white/60 text-sm">
           <span>Powered by Scryfall API</span>
-          <span>CR AudioViz AI Games • CRAVCards</span>
+          <span>CR AudioViz AI Games • Javari Cards</span>
         </div>
       </footer>
     </div>
