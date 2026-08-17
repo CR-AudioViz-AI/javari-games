@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "id": "vault",
+  "title": "The Vault",
+  "tagline": "Seven relics. Three are hidden. The keep will not tell you where.",
+  "description": "A first-person exploration game set in a torch-lit fortress at last light. Seven relics are scattered through the keep: four sit in plain sight, three are hidden behind things the world shows you but never explains. A sconce burns blue instead of orange. A scorch mark surrounds the well. A banner hangs on a wall with no window behind it. Nothing tells you what any of it means. Players who look are rewarded with the vault beneath the courtyard; players who do not still finish with four of seven and a shorter story.",
+  "genre": ["exploration", "puzzle", "atmospheric"],
+  "sessionMinutes": { "typical": 12, "complete": 25 },
+  "renderer": "webgl2",
+  "multiplayer": { "supported": false },
+
+  "controls": [
+    { "input": "W A S D", "action": "Walk", "keys": ["w", "a", "s", "d"] },
+    { "input": "Arrow keys", "action": "Look around", "keys": ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"] },
+    { "input": "Drag the mouse", "action": "Look around" },
+    { "input": "Shift", "action": "Run", "keys": ["Shift"], "optional": true },
+    { "input": "Space", "action": "Jump", "keys": [" "] },
+    { "input": "E", "action": "Interact — light a sconce, climb out of the well", "keys": ["e"] },
+    { "input": "Double-click", "action": "Lock the mouse pointer", "optional": true }
+  ],
+  "keyboardComplete": true,
+  "touchSupported": false,
+  "respectsReducedMotion": false,
+
+  "objectives": [
+    { "id": "four", "name": "Recover the four open relics", "brief": "The hall, the east tower, the west breach.",
+      "required": true, "verify": { "kind": "dom-text", "contains": "4 / 7" } },
+    { "id": "all", "name": "Recover all seven", "brief": "Including the three hidden.",
+      "required": true, "verify": { "kind": "dom-text", "contains": "All seven" } }
+  ],
+
+  "secrets": [
+    {
+      "id": "lamp", "name": "Ever-Lamp", "discoverable": true,
+      "inWorldTell": "One sconce on the north wall burns blue instead of orange, and it is dimmer than every other flame in the keep.",
+      "hints": [
+        "One light in this keep is the wrong colour.",
+        "The north wall has a blue sconce. Blue means cold, or unlit, or something else.",
+        "Stand at the blue sconce on the north wall and press E. The wall beside it stops being a wall."
+      ],
+      "solution": [
+        { "action": { "type": "move", "forwardMs": 2600, "turnDeg": 180 }, "note": "Cross the courtyard to the north wall" },
+        { "action": { "type": "key", "keys": ["e"] }, "note": "Light the blue sconce" },
+        { "action": { "type": "move", "forwardMs": 900 }, "note": "Walk through where the wall was" }
+      ]
+    },
+    {
+      "id": "key", "name": "Vault Key", "discoverable": true,
+      "inWorldTell": "A wide scorch mark surrounds the well, burnt into the flagstones. Nothing else in the courtyard is burnt.",
+      "hints": [
+        "Something burned here, and nobody cleaned it up.",
+        "The scorch mark around the well is not decoration.",
+        "Walk into the well. You fall to the chamber below and the key is on the floor."
+      ],
+      "solution": [
+        { "action": { "type": "move", "forwardMs": 1800, "turnDeg": 45 }, "note": "Head for the well, south-east of the hall" },
+        { "action": { "type": "move", "forwardMs": 400 }, "note": "Walk into the shaft" }
+      ]
+    },
+    {
+      "id": "crown", "name": "Ashen Crown", "discoverable": true,
+      "inWorldTell": "Inside the great hall, a banner hangs on the north-east wall — the only wall with cloth and no window behind it.",
+      "hints": [
+        "A banner needs a reason to hang where it hangs.",
+        "Inside the hall, one wall has cloth but nothing behind it.",
+        "The banner on the north-east wall of the hall. Get up to it."
+      ],
+      "solution": [
+        { "action": { "type": "move", "forwardMs": 1400 }, "note": "Enter the hall through the south doorway" },
+        { "action": { "type": "key", "keys": [" "], "holdMs": 200 }, "note": "Jump to reach the banner" }
+      ]
+    },
+    {
+      "id": "seal", "name": "Vault Seal", "discoverable": true,
+      "inWorldTell": "The chamber below the courtyard is lit and empty until you carry the key.",
+      "hints": [
+        "The vault does not open for nothing.",
+        "You need what is beneath the well first.",
+        "Carry the Vault Key into the chamber below the courtyard."
+      ],
+      "solution": [
+        { "action": { "type": "assert", "verify": { "kind": "dom-text", "contains": "Vault Key" } }, "note": "Key must be held" },
+        { "action": { "type": "move", "forwardMs": 1600, "turnDeg": 200 }, "note": "Cross the vault chamber" }
+      ]
+    }
+  ],
+
+  "walkthrough": [
+    { "action": { "type": "click", "selector": "button" }, "note": "Enter the keep" },
+    { "action": { "type": "move", "forwardMs": 2200 }, "note": "North through the gatehouse into the courtyard" },
+    { "action": { "type": "move", "forwardMs": 1400 }, "note": "Into the great hall — the Steward's Cup is on the table" },
+    { "action": { "type": "key", "keys": [" "] }, "note": "Jump to the banner for the Ashen Crown" },
+    { "action": { "type": "move", "forwardMs": 1800, "turnDeg": 90 }, "note": "North-east tower for the Signet" },
+    { "action": { "type": "move", "forwardMs": 2400, "turnDeg": 180 }, "note": "West breach for the Broken Blade" },
+    { "action": { "type": "move", "forwardMs": 1600, "turnDeg": 90 }, "note": "North wall blue sconce" },
+    { "action": { "type": "key", "keys": ["e"] }, "note": "Open the false wall for the Ever-Lamp" },
+    { "action": { "type": "move", "forwardMs": 2600, "turnDeg": 160 }, "note": "The well" },
+    { "action": { "type": "move", "forwardMs": 400 }, "note": "Descend for the Vault Key" },
+    { "action": { "type": "move", "forwardMs": 1600 }, "note": "Vault chamber for the Seal" },
+    { "action": { "type": "assert", "verify": { "kind": "dom-text", "contains": "All seven" } }, "note": "Completion" }
+  ],
+
+  "adSurfaces": [
+    { "id": "tavern-left", "placement": "Screen on the tavern west wall", "visibleFrom": "Inside the tavern, facing west" },
+    { "id": "tavern-right", "placement": "Screen on the tavern east wall", "visibleFrom": "Inside the tavern, facing east" },
+    { "id": "gate-banner", "placement": "Screen above the gatehouse arch", "visibleFrom": "The courtyard, looking south" }
+  ],
+
+  "credits": [
+    { "role": "Design and direction", "name": "Roy Henderson" },
+    { "role": "Engineering", "name": "Claude, Anthropic" },
+    { "role": "Studio", "name": "CR AudioViz AI, LLC" }
+  ],
+  "studio": "CR AudioViz AI, LLC",
+  "contact": "support@craudiovizai.com"
+}
