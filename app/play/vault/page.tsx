@@ -456,7 +456,10 @@ export default function Vault() {
     scene.add(embers)
 
     // ── Player ──────────────────────────────────────────────────────────────
-    const P = { x: 0, y: 1.7, z: 26, yaw: Math.PI, pitch: -0.05, vy: 0, grounded: true, below: false }
+    // 2026-08-16: spawned at z=26 with yaw=PI, which faces AWAY from the keep —
+    // the first thing a player saw was empty grass. Camera looks down -Z at yaw
+    // 0, so from +Z that points at the origin. Also moved closer.
+    const P = { x: 0, y: 1.7, z: 22, yaw: 0, pitch: -0.02, vy: 0, grounded: true, below: false }
     const keys: Record<string, boolean> = {}
     const found = new Set<string>()
     let blueLit = false
@@ -465,7 +468,7 @@ export default function Vault() {
 
     const kd = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = true
-      if ([' ', 'w', 'a', 's', 'd'].includes(e.key.toLowerCase())) e.preventDefault()
+      if ([' ','w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase())) e.preventDefault()
       // E interacts: light a sconce you are standing at.
       if (e.key.toLowerCase() === 'e') {
         for (const t of torches) {
@@ -488,14 +491,30 @@ export default function Vault() {
     window.addEventListener('keydown', kd)
     window.addEventListener('keyup', ku)
 
+    // Look control, three ways, because pointer lock alone is hostile:
+    // locked mouse for players who want it, click-drag for those who do not,
+    // and arrow keys for anyone on a trackpad.
+    let dragging = false
+    let lastX = 0, lastY = 0
     const onMove = (e: MouseEvent) => {
-      if (document.pointerLockElement !== canvas) return
-      P.yaw -= e.movementX * 0.0022
-      P.pitch = Math.max(-1.2, Math.min(1.0, P.pitch - e.movementY * 0.0022))
+      if (document.pointerLockElement === canvas) {
+        P.yaw -= e.movementX * 0.0022
+        P.pitch = Math.max(-1.2, Math.min(1.0, P.pitch - e.movementY * 0.0022))
+        return
+      }
+      if (!dragging) return
+      P.yaw -= (e.clientX - lastX) * 0.005
+      P.pitch = Math.max(-1.2, Math.min(1.0, P.pitch - (e.clientY - lastY) * 0.005))
+      lastX = e.clientX; lastY = e.clientY
     }
+    const onDown = (e: MouseEvent) => { dragging = true; lastX = e.clientX; lastY = e.clientY }
+    const onUp = () => { dragging = false }
     document.addEventListener('mousemove', onMove)
+    canvas.addEventListener('mousedown', onDown)
+    window.addEventListener('mouseup', onUp)
+    // Double-click opts into pointer lock rather than stealing it on first click.
     const lock = () => { canvas.requestPointerLock?.() }
-    canvas.addEventListener('click', lock)
+    canvas.addEventListener('dblclick', lock)
 
     let W = 900, H = 540
     const resize = () => {
@@ -514,7 +533,7 @@ export default function Vault() {
 
     const frustum = new THREE.Frustum()
     const projScreen = new THREE.Matrix4()
-    let raf = 0, last = performance.now(), uiTimer = 0
+    let raf = 0, last = performance.now(), uiTimer = 0, adTimer = 0
 
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -523,6 +542,12 @@ export default function Vault() {
 
       if (started) {
         // Movement relative to facing.
+        // Arrow keys turn and pitch, so the game is playable with no mouse.
+        if (keys['arrowleft']) P.yaw += 1.8 * dt
+        if (keys['arrowright']) P.yaw -= 1.8 * dt
+        if (keys['arrowup']) P.pitch = Math.min(1.0, P.pitch + 1.2 * dt)
+        if (keys['arrowdown']) P.pitch = Math.max(-1.2, P.pitch - 1.2 * dt)
+
         const sp = (keys['shift'] ? 9 : 5.2) * dt
         const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw)
         let dx = 0, dz = 0
@@ -583,8 +608,16 @@ export default function Vault() {
 
       // Ad rotation, and honest impression logging: only count a screen that is
       // actually in the frustum AND close enough to read.
-      projScreen.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-      frustum.setFromProjectionMatrix(projScreen)
+      // 2026-08-16: the frustum rebuild ran every frame and showed up as an INP
+      // warning. Impressions are billed in seconds, so testing four times a
+      // second is exactly as accurate and a quarter of the cost.
+      adTimer += dt
+      const testAds = adTimer > 0.25
+      if (testAds) adTimer = 0
+      if (testAds) {
+        projScreen.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+        frustum.setFromProjectionMatrix(projScreen)
+      }
       for (const s of screens) {
         s.timer += dt
         if (s.timer > 9) {
@@ -592,11 +625,12 @@ export default function Vault() {
           s.slot = (s.slot + 1) % AD_CREATIVE.length
           drawAd(s)
         }
+        if (!testAds) continue
         const wp = s.mesh.getWorldPosition(new THREE.Vector3())
         const dist = wp.distanceTo(camera.position)
         if (dist < 14 && frustum.containsPoint(wp)) {
           const id = AD_CREATIVE[s.slot % AD_CREATIVE.length].id
-          impressions[id] = (impressions[id] ?? 0) + dt
+          impressions[id] = (impressions[id] ?? 0) + 0.25
         }
       }
 
@@ -632,7 +666,9 @@ export default function Vault() {
       window.removeEventListener('keydown', kd)
       window.removeEventListener('keyup', ku)
       document.removeEventListener('mousemove', onMove)
-      canvas.removeEventListener('click', lock)
+      canvas.removeEventListener('dblclick', lock)
+      canvas.removeEventListener('mousedown', onDown)
+      window.removeEventListener('mouseup', onUp)
       renderer.dispose()
     }
   }, [sync])
@@ -688,13 +724,14 @@ export default function Vault() {
             <Overlay>
               <h2 style={{ fontSize: 32, margin: '0 0 6px', color: '#fff' }}>The Vault</h2>
               <p style={{ color: 'rgba(255,255,255,0.82)', maxWidth: 520, margin: '0 0 6px' }}>
-                <b>WASD</b> to walk · <b>mouse</b> to look · <b>shift</b> to run · <b>space</b> to jump ·
-                <b> E</b> to interact
+                <b>WASD</b> walk · <b>drag the mouse</b> or <b>arrow keys</b> to look ·
+                <b>shift</b> run · <b>space</b> jump · <b>E</b> interact
               </p>
               <p style={{ color: 'rgba(255,255,255,0.55)', maxWidth: 520, margin: '0 0 20px', fontSize: 13 }}>
                 Four relics sit in plain sight. Three do not. The keep hides a false wall,
                 a shaft beneath the well, and a chamber below the courtyard.
                 Nothing will tell you where — but the world will show you if you look.
+                Double-click the view to lock the mouse if you prefer that.
               </p>
               <Button onClick={begin}>Enter the keep</Button>
             </Overlay>
