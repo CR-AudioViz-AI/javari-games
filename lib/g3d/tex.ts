@@ -228,6 +228,133 @@ export function grassSurface(): Surface {
   return { map: tex(c, 1), normalMap: normalFrom(h, 0.8), roughnessMap: tex(r, 1, false) }
 }
 
+/** Cobbled street — irregular rounded setts with mud in the joints. */
+export function cobbleSurface(tint = '#7a7469'): Surface {
+  const [c, g] = cv(256)
+  const [h, hg] = cv(256)
+  const [r, rg] = cv(256)
+  g.fillStyle = '#3b352d'; g.fillRect(0, 0, 256, 256)
+  hg.fillStyle = '#303030'; hg.fillRect(0, 0, 256, 256)
+  rg.fillStyle = '#d0d0d0'; rg.fillRect(0, 0, 256, 256)
+  // Setts are laid in offset rows and each one is an irregular blob, not a
+  // rectangle — a grid of squares reads as a texture atlas, not a street.
+  const rows = 11
+  const rh = 256 / rows
+  for (let row = 0; row < rows; row++) {
+    const off = (row % 2) * rh * 0.6
+    for (let x = -rh; x < 256 + rh; x += rh * 1.15) {
+      const cx = x + off + rh * 0.55 + (Math.random() - 0.5) * 3
+      const cy = row * rh + rh * 0.5 + (Math.random() - 0.5) * 3
+      const rx = rh * (0.44 + Math.random() * 0.09)
+      const ry = rh * (0.38 + Math.random() * 0.09)
+      const v = 0.78 + Math.random() * 0.42
+      g.fillStyle = shade(tint, v)
+      g.beginPath(); g.ellipse(cx, cy, rx, ry, Math.random() * 0.6 - 0.3, 0, Math.PI * 2); g.fill()
+      for (let i = 0; i < 24; i++) {
+        g.fillStyle = `rgba(0,0,0,${Math.random() * 0.10})`
+        g.fillRect(cx - rx + Math.random() * rx * 2, cy - ry + Math.random() * ry * 2, 2, 2)
+      }
+      // A wet sett is smoother and reflects the torches.
+      const wet = Math.random() < 0.3
+      rg.fillStyle = wet ? '#7a7a7a' : '#dcdcdc'
+      rg.beginPath(); rg.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); rg.fill()
+      hg.fillStyle = `rgb(${Math.round(165 + Math.random() * 70)},0,0)`
+      hg.beginPath(); hg.ellipse(cx, cy, rx * 0.94, ry * 0.94, 0, 0, Math.PI * 2); hg.fill()
+    }
+  }
+  // Cart ruts worn down the middle of the road.
+  const rut = g.createLinearGradient(96, 0, 160, 0)
+  rut.addColorStop(0, 'rgba(30,24,16,0)')
+  rut.addColorStop(0.5, 'rgba(30,24,16,0.28)')
+  rut.addColorStop(1, 'rgba(30,24,16,0)')
+  g.fillStyle = rut; g.fillRect(0, 0, 256, 256)
+  return { map: tex(c, 1), normalMap: normalFrom(h, 2.8), roughnessMap: tex(r, 1, false) }
+}
+
+/** Lime plaster over timber framing — cracked, stained, patched. */
+export function plasterSurface(tint = '#d8cfb8'): Surface {
+  const [c, g] = cv(256)
+  const [h, hg] = cv(256)
+  const [r, rg] = cv(256)
+  g.fillStyle = shade(tint, 1); g.fillRect(0, 0, 256, 256)
+  hg.fillStyle = '#8a8a8a'; hg.fillRect(0, 0, 256, 256)
+  rg.fillStyle = '#ececec'; rg.fillRect(0, 0, 256, 256)
+  // Trowel mottling first, so cracks and stains sit on top of it.
+  for (let i = 0; i < 70; i++) {
+    const x = Math.random() * 256, y = Math.random() * 256
+    const rad = 14 + Math.random() * 40
+    const gr = g.createRadialGradient(x, y, 0, x, y, rad)
+    gr.addColorStop(0, Math.random() < 0.5 ? 'rgba(255,250,235,0.30)' : 'rgba(150,140,120,0.26)')
+    gr.addColorStop(1, 'rgba(0,0,0,0)')
+    g.fillStyle = gr
+    g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill()
+  }
+  // Hairline cracks that branch — a straight line reads as a scratch.
+  for (let i = 0; i < 14; i++) {
+    let x = Math.random() * 256, y = Math.random() * 256
+    let a = Math.random() * Math.PI * 2
+    g.strokeStyle = 'rgba(70,60,48,0.42)'
+    g.lineWidth = 0.8
+    g.beginPath(); g.moveTo(x, y)
+    for (let k = 0; k < 16; k++) {
+      a += (Math.random() - 0.5) * 0.9
+      x += Math.cos(a) * 5; y += Math.sin(a) * 5
+      g.lineTo(x, y)
+      hg.fillStyle = 'rgba(0,0,0,0.5)'
+      hg.fillRect(x, y, 1.5, 1.5)
+    }
+    g.stroke()
+  }
+  // Damp rising from the ground, which is where real plaster fails first.
+  const damp = g.createLinearGradient(0, 176, 0, 256)
+  damp.addColorStop(0, 'rgba(96,104,78,0)')
+  damp.addColorStop(1, 'rgba(96,104,78,0.42)')
+  g.fillStyle = damp; g.fillRect(0, 0, 256, 256)
+  rg.fillStyle = 'rgba(120,120,120,0.55)'
+  rg.fillRect(0, 200, 256, 56)
+  return { map: tex(c, 1), normalMap: normalFrom(h, 1.1), roughnessMap: tex(r, 1, false) }
+}
+
+/** Hammered iron — pitted, rusted at the edges. Use with metalness. */
+export function ironSurface(tint = '#5d6068'): Surface {
+  const [c, g] = cv(256)
+  const [h, hg] = cv(256)
+  const [r, rg] = cv(256)
+  g.fillStyle = shade(tint, 1); g.fillRect(0, 0, 256, 256)
+  hg.fillStyle = '#7a7a7a'; hg.fillRect(0, 0, 256, 256)
+  rg.fillStyle = '#6a6a6a'; rg.fillRect(0, 0, 256, 256)
+  // Hammer facets: overlapping soft dents catching light at different angles.
+  for (let i = 0; i < 260; i++) {
+    const x = Math.random() * 256, y = Math.random() * 256
+    const rad = 5 + Math.random() * 11
+    const gr = g.createRadialGradient(x - rad * 0.3, y - rad * 0.3, 0, x, y, rad)
+    gr.addColorStop(0, 'rgba(255,255,255,0.14)')
+    gr.addColorStop(1, 'rgba(0,0,0,0.16)')
+    g.fillStyle = gr
+    g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill()
+    hg.fillStyle = `rgba(255,255,255,${0.12 + Math.random() * 0.2})`
+    hg.beginPath(); hg.arc(x, y, rad * 0.8, 0, Math.PI * 2); hg.fill()
+  }
+  // Rust blooms. Rust is rough where the clean metal is not, which is the whole
+  // reason this needs a roughness map rather than a single value.
+  for (let i = 0; i < 26; i++) {
+    const x = Math.random() * 256, y = Math.random() * 256
+    const rad = 8 + Math.random() * 26
+    const gr = g.createRadialGradient(x, y, 0, x, y, rad)
+    gr.addColorStop(0, 'rgba(138,72,32,0.62)')
+    gr.addColorStop(0.6, 'rgba(112,58,26,0.34)')
+    gr.addColorStop(1, 'rgba(112,58,26,0)')
+    g.fillStyle = gr
+    g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill()
+    const rr = rg.createRadialGradient(x, y, 0, x, y, rad)
+    rr.addColorStop(0, 'rgba(235,235,235,0.9)')
+    rr.addColorStop(1, 'rgba(235,235,235,0)')
+    rg.fillStyle = rr
+    rg.beginPath(); rg.arc(x, y, rad, 0, Math.PI * 2); rg.fill()
+  }
+  return { map: tex(c, 1), normalMap: normalFrom(h, 1.9), roughnessMap: tex(r, 1, false) }
+}
+
 /** Apply a Surface to a material with sensible tiling. */
 export function surfaced(s: Surface, repeat: number, extra: THREE.MeshStandardMaterialParameters = {}): THREE.MeshStandardMaterial {
   const map = s.map.clone(); map.needsUpdate = true; map.repeat.set(repeat, repeat)
