@@ -59,6 +59,31 @@ const AD_CREATIVE: AdSlot[] = [
     cta: 'veterans.craudiovizai.com', bg: '#0f1c2e', fg: '#ffc23c', kind: 'own' },
 ]
 
+/** Three escalating hints per relic. A nudge, a push, then the answer. */
+const HINTS: Record<string, string[]> = {
+  cup:   ['Somewhere people would sit and eat.',
+          'The great hall has a doorway on its south side.',
+          'On the table, in the middle of the hall.'],
+  ring:  ['The towers are not just decoration.',
+          'North-east corner of the curtain wall.',
+          'At the foot of the north-east tower, outside it.'],
+  blade: ['One stretch of wall never got repaired.',
+          'The west wall has a gap in it.',
+          'Walk through the breach in the west wall and look down.'],
+  lamp:  ['One light in this keep is the wrong colour.',
+          'The north wall has a blue sconce. Blue means cold, or unlit, or something else.',
+          'Stand at the blue sconce on the north wall and press E. The wall beside it opens.'],
+  key:   ['Something burned here, and nobody cleaned it up.',
+          'The scorch mark around the well is not decoration.',
+          'Walk into the well. You will fall to the chamber below.'],
+  crown: ['A banner needs a reason to hang where it hangs.',
+          'Inside the hall, one wall has cloth but no window behind it.',
+          'The banner on the north-east wall of the hall. Get up to it.'],
+  seal:  ['The vault does not open for nothing.',
+          'You need the key from beneath the well first.',
+          'In the chamber below the courtyard, once you carry the Vault Key.'],
+}
+
 export default function Vault() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [ui, setUi] = useState({
@@ -67,6 +92,11 @@ export default function Vault() {
     locked: false,
   })
   const api = useRef<{ start: () => void } | null>(null)
+  // 2026-08-16: a player dropped into a fortress with no objective is lost, not
+  // intrigued. Help is always one click away, and hints escalate rather than
+  // giving the answer straight out.
+  const [panel, setPanel] = useState<'' | 'help' | 'hints' | 'map'>('')
+  const [revealed, setRevealed] = useState<Record<string, number>>({})
 
   const sync = useCallback((f: string[], near: string, hint: string, t: number,
                             imp: Record<string, number>, locked: boolean) => {
@@ -700,6 +730,93 @@ export default function Vault() {
             border: '1px solid rgba(255,176,74,0.22)', boxShadow: '0 18px 50px rgba(0,0,0,0.6)',
             cursor: ui.phase === 'play' ? 'none' : 'pointer' }} />
 
+          {/* Always-available help. Icons, not a menu buried in a pause screen. */}
+          <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 7 }}>
+            <IconBtn on={panel === 'help'} label="?" title="Controls and objective"
+              onClick={() => setPanel(panel === 'help' ? '' : 'help')} />
+            <IconBtn on={panel === 'hints'} label="!" title="Hints"
+              onClick={() => setPanel(panel === 'hints' ? '' : 'hints')} />
+            <IconBtn on={panel === 'map'} label="M" title="Where things are"
+              onClick={() => setPanel(panel === 'map' ? '' : 'map')} />
+          </div>
+
+          {panel === 'help' && (
+            <Panel onClose={() => setPanel('')} title="How to play">
+              <Row k="Move" v="W A S D" />
+              <Row k="Look" v="Drag the mouse, or the arrow keys" />
+              <Row k="Run" v="Hold Shift" />
+              <Row k="Jump" v="Space" />
+              <Row k="Interact" v="E — lights a sconce, climbs out of the well" />
+              <Row k="Lock the mouse" v="Double-click the view" />
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,176,74,0.2)',
+                            color: 'rgba(237,228,214,0.75)', fontSize: 12.5, lineHeight: 1.6 }}>
+                <b style={{ color: '#ffc06a' }}>Your objective.</b> Find seven relics inside the
+                keep. Four sit in plain sight — the hall, the east tower, the breach in the west
+                wall. Three are hidden behind things the keep will not explain: a wall that is not
+                a wall, a shaft under the well, and a chamber below the courtyard.
+              </div>
+            </Panel>
+          )}
+
+          {panel === 'hints' && (
+            <Panel onClose={() => setPanel('')} title="Hints">
+              <div style={{ color: 'rgba(237,228,214,0.6)', fontSize: 12, marginBottom: 8 }}>
+                Each hint has three levels. Take only what you need — the game does not
+                judge you, but finding it yourself is the point.
+              </div>
+              {RELICS.filter(r => !ui.found.includes(r.id)).map(r => {
+                const lvl = revealed[r.id] ?? 0
+                const steps = HINTS[r.id] ?? [r.hint]
+                return (
+                  <div key={r.id} style={{ padding: '7px 0',
+                                           borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 800, fontSize: 13,
+                                     color: r.secret ? '#6fd8ff' : '#ffc06a' }}>
+                        {r.secret && lvl === 0 ? 'A hidden relic' : r.name}
+                      </span>
+                      <button onClick={() => setRevealed(v => ({ ...v, [r.id]: Math.min(steps.length, lvl + 1) }))}
+                        disabled={lvl >= steps.length}
+                        style={{ background: lvl >= steps.length ? 'rgba(255,255,255,0.05)' : 'rgba(255,176,74,0.18)',
+                          border: '1px solid rgba(255,176,74,0.4)', color: '#ffc06a',
+                          borderRadius: 7, padding: '3px 10px', fontSize: 11.5, fontWeight: 700,
+                          cursor: lvl >= steps.length ? 'default' : 'pointer' }}>
+                        {lvl >= steps.length ? 'told' : lvl === 0 ? 'nudge' : lvl === 1 ? 'more' : 'tell me'}
+                      </button>
+                    </div>
+                    {steps.slice(0, lvl).map((t, i) => (
+                      <div key={i} style={{ fontSize: 12, color: 'rgba(237,228,214,0.72)', marginTop: 3 }}>
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
+            </Panel>
+          )}
+
+          {panel === 'map' && (
+            <Panel onClose={() => setPanel('')} title="The keep">
+              <pre style={{ margin: 0, fontSize: 11.5, lineHeight: 1.5, color: 'rgba(237,228,214,0.8)',
+                            fontFamily: 'ui-monospace, monospace' }}>{`
+   NORTH  — false wall, blue sconce
+   ┌────────────░░────────────┐
+   │  T                    T  │   T = tower
+   │                          │
+   │         ┌─────┐          │   H = great hall
+   │  west   │  H  │          │
+   ═  breach └─────┘      ●   │   ● = the well
+   │                          │
+   │  T          ▓▓▓       T  │   ▓ = tavern (ad screens)
+   └──────────╫╫──────────────┘
+        SOUTH — gatehouse, you start here
+
+   Below the courtyard: the vault chamber.
+   Reached through the well, once you hold the key.
+`}</pre>
+            </Panel>
+          )}
+
           {/* Crosshair */}
           {ui.phase === 'play' && (
             <div style={{ position: 'absolute', left: '50%', top: '50%', width: 5, height: 5,
@@ -799,6 +916,46 @@ export default function Vault() {
           Built to VISUAL-STANDARD.md · CR AudioViz AI · EIN 39-3646201
         </p>
       </div>
+    </div>
+  )
+}
+
+function IconBtn({ on, label, title, onClick }:
+  { on: boolean; label: string; title: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} title={title}
+      style={{ width: 34, height: 34, borderRadius: 9, fontWeight: 900, fontSize: 15,
+        background: on ? '#ffb04a' : 'rgba(10,14,26,0.8)',
+        border: `1px solid ${on ? '#ffb04a' : 'rgba(255,176,74,0.45)'}`,
+        color: on ? '#2a1a06' : '#ffc06a', cursor: 'pointer' }}>
+      {label}
+    </button>
+  )
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14,
+                  fontSize: 12.5, padding: '3px 0' }}>
+      <span style={{ color: 'rgba(237,228,214,0.6)' }}>{k}</span>
+      <span style={{ color: '#EDE4D6', fontWeight: 600, textAlign: 'right' }}>{v}</span>
+    </div>
+  )
+}
+
+function Panel({ title, children, onClose }:
+  { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div style={{ position: 'absolute', top: 54, right: 12, width: 'min(400px, 88%)',
+                  maxHeight: '74%', overflowY: 'auto', background: 'rgba(8,12,24,0.94)',
+                  border: '1px solid rgba(255,176,74,0.35)', borderRadius: 12, padding: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    marginBottom: 8 }}>
+        <span style={{ fontWeight: 900, fontSize: 15, color: '#ffc06a' }}>{title}</span>
+        <button onClick={onClose} style={{ background: 'none', border: 'none',
+          color: 'rgba(237,228,214,0.6)', fontSize: 18, cursor: 'pointer', lineHeight: 1 }}>×</button>
+      </div>
+      {children}
     </div>
   )
 }
