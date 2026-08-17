@@ -16,12 +16,17 @@
 //
 // CR AudioViz AI, LLC · EIN 39-3646201 · August 2026
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { BloomRenderer, makeBloom } from '@/lib/gfx/bloom'
 import { State, UPGRADES, buy, costOf, newState, startWave, step } from './engine'
 
 const STEP = 1 / 60
 
 export default function Ionstorm() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  // The 2D work happens on an offscreen canvas; the visible one is WebGL and
+  // only ever receives the post-processed result.
+  const sceneRef = useRef<HTMLCanvasElement | null>(null)
+  const bloomRef = useRef<BloomRenderer | null>(null)
   const stateRef = useRef<State | null>(null)
   const keys = useRef<Record<string, boolean>>({})
   const mouse = useRef({ x: 0, y: 0, down: false })
@@ -38,8 +43,11 @@ export default function Ionstorm() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!sceneRef.current) sceneRef.current = document.createElement('canvas')
+    const scene = sceneRef.current
+    const ctx = scene.getContext('2d', { alpha: false })
     if (!ctx) return
+    bloomRef.current = makeBloom(canvas, { intensity: 1.25, threshold: 0.50, aberration: 0.014, vignette: 0.44 })
 
     const resize = () => {
       const r = canvas.parentElement?.getBoundingClientRect()
@@ -47,8 +55,8 @@ export default function Ionstorm() {
       const h = Math.round(w * 0.62)
       // Render at device resolution so the neon edges stay crisp on retina.
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = w * dpr
-      canvas.height = h * dpr
+      scene.width = w * dpr; scene.height = h * dpr
+      bloomRef.current?.resize(w * dpr, h * dpr)
       canvas.style.width = `${w}px`
       canvas.style.height = `${h}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -114,6 +122,10 @@ export default function Ionstorm() {
       }
 
       draw(ctx, s)
+
+      // One blit through bright-pass, separable blur and composite.
+
+      bloomRef.current?.present(scene, now)
       if (s.phase !== 'playing') sync()
       else if (Math.random() < 0.12) sync()
       raf = requestAnimationFrame(frame)
@@ -122,6 +134,7 @@ export default function Ionstorm() {
 
     return () => {
       cancelAnimationFrame(raf)
+      bloomRef.current?.dispose()
       window.removeEventListener('resize', resize)
       window.removeEventListener('keydown', kd)
       window.removeEventListener('keyup', ku)

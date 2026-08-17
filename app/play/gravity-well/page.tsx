@@ -10,10 +10,15 @@
 //
 // CR AudioViz AI, LLC · EIN 39-3646201 · August 2026
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { BloomRenderer, makeBloom } from '@/lib/gfx/bloom'
 import { State, launch, loadLevel, newState, nextLevel, predict, step } from './engine'
 
 export default function GravityWell() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  // The 2D work happens on an offscreen canvas; the visible one is WebGL and
+  // only ever receives the post-processed result.
+  const sceneRef = useRef<HTMLCanvasElement | null>(null)
+  const bloomRef = useRef<BloomRenderer | null>(null)
   const ref = useRef<State | null>(null)
   const drag = useRef<{ active: boolean; x: number; y: number }>({ active: false, x: 0, y: 0 })
   const [ui, setUi] = useState({ phase: 'aim', level: 0, name: '', hint: '',
@@ -31,15 +36,19 @@ export default function GravityWell() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!sceneRef.current) sceneRef.current = document.createElement('canvas')
+    const scene = sceneRef.current
+    const ctx = scene.getContext('2d', { alpha: false })
     if (!ctx) return
+    bloomRef.current = makeBloom(canvas, { intensity: 1.35, threshold: 0.44, aberration: 0.010, vignette: 0.48 })
 
     const resize = () => {
       const r = canvas.parentElement?.getBoundingClientRect()
       const w = Math.min(1100, r ? r.width - 8 : 900)
       const h = Math.round(w * 0.60)
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = w * dpr; canvas.height = h * dpr
+      scene.width = w * dpr; scene.height = h * dpr
+      bloomRef.current?.resize(w * dpr, h * dpr)
       canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       let best: Record<number, number> = {}
@@ -93,6 +102,8 @@ export default function GravityWell() {
       const before = s.phase
       step(s, dt)
       draw(ctx, s, drag.current)
+      // One blit through bright-pass, separable blur and composite.
+      bloomRef.current?.present(scene, now)
       if (s.phase !== before) sync()
       raf = requestAnimationFrame(frame)
     }
@@ -100,6 +111,7 @@ export default function GravityWell() {
 
     return () => {
       cancelAnimationFrame(raf)
+      bloomRef.current?.dispose()
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('pointerdown', down)
       canvas.removeEventListener('pointermove', move)

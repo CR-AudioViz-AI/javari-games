@@ -12,6 +12,7 @@
 //
 // CR AudioViz AI, LLC · EIN 39-3646201 · August 2026
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { BloomRenderer, makeBloom } from '@/lib/gfx/bloom'
 import {
   Hex, LEVEL_COUNT, State, axialToPixel, fit, key, newState, nextLevel,
   pixelToAxial, retry, shoot, step,
@@ -19,6 +20,10 @@ import {
 
 export default function Hexbreaker() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  // The 2D work happens on an offscreen canvas; the visible one is WebGL and
+  // only ever receives the post-processed result.
+  const sceneRef = useRef<HTMLCanvasElement | null>(null)
+  const bloomRef = useRef<BloomRenderer | null>(null)
   const ref = useRef<State | null>(null)
   const hover = useRef<{ q: number; r: number } | null>(null)
   const [ui, setUi] = useState({ phase: 'aim', level: 0, charges: 6, score: 0,
@@ -35,15 +40,19 @@ export default function Hexbreaker() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!sceneRef.current) sceneRef.current = document.createElement('canvas')
+    const scene = sceneRef.current
+    const ctx = scene.getContext('2d', { alpha: false })
     if (!ctx) return
+    bloomRef.current = makeBloom(canvas, { intensity: 1.05, threshold: 0.58, aberration: 0.008, vignette: 0.38 })
 
     const resize = () => {
       const r = canvas.parentElement?.getBoundingClientRect()
       const w = Math.min(1100, r ? r.width - 8 : 900)
       const h = Math.round(w * 0.62)
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = w * dpr; canvas.height = h * dpr
+      scene.width = w * dpr; scene.height = h * dpr
+      bloomRef.current?.resize(w * dpr, h * dpr)
       canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       if (!ref.current) {
@@ -87,6 +96,8 @@ export default function Hexbreaker() {
       const before = s.phase
       while (acc >= STEP) { step(s, STEP); acc -= STEP }
       draw(ctx, s, hover.current)
+      // One blit through bright-pass, separable blur and composite.
+      bloomRef.current?.present(scene, now)
       if (s.phase !== before) sync()
       else if (s.phase === 'resolving' && Math.random() < 0.3) sync()
       raf = requestAnimationFrame(frame)
@@ -95,6 +106,7 @@ export default function Hexbreaker() {
 
     return () => {
       cancelAnimationFrame(raf)
+      bloomRef.current?.dispose()
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('pointermove', move)
       canvas.removeEventListener('pointerleave', leave)

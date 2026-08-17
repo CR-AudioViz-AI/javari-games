@@ -11,10 +11,15 @@
 //
 // CR AudioViz AI, LLC · EIN 39-3646201 · August 2026
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { BloomRenderer, makeBloom } from '@/lib/gfx/bloom'
 import { State, fmt, loadTrack, newState, start, step } from './engine'
 
 export default function NeonDrift() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  // The 2D work happens on an offscreen canvas; the visible one is WebGL and
+  // only ever receives the post-processed result.
+  const sceneRef = useRef<HTMLCanvasElement | null>(null)
+  const bloomRef = useRef<BloomRenderer | null>(null)
   const ref = useRef<State | null>(null)
   const bg = useRef<HTMLCanvasElement | null>(null)
   const keys = useRef<Record<string, boolean>>({})
@@ -81,15 +86,19 @@ export default function NeonDrift() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!sceneRef.current) sceneRef.current = document.createElement('canvas')
+    const scene = sceneRef.current
+    const ctx = scene.getContext('2d', { alpha: false })
     if (!ctx) return
+    bloomRef.current = makeBloom(canvas, { intensity: 1.15, threshold: 0.55, aberration: 0.016, vignette: 0.40 })
 
     const resize = () => {
       const r = canvas.parentElement?.getBoundingClientRect()
       const w = Math.min(1100, r ? r.width - 8 : 900)
       const h = Math.round(w * 0.60)
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = w * dpr; canvas.height = h * dpr
+      scene.width = w * dpr; scene.height = h * dpr
+      bloomRef.current?.resize(w * dpr, h * dpr)
       canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       let best: Record<number, number> = {}
@@ -127,6 +136,8 @@ export default function NeonDrift() {
         acc -= STEP
       }
       draw(ctx, s, bg.current)
+      // One blit through bright-pass, separable blur and composite.
+      bloomRef.current?.present(scene, now)
       if (s.phase !== 'racing' || Math.random() < 0.2) sync()
       raf = requestAnimationFrame(frame)
     }
@@ -134,6 +145,7 @@ export default function NeonDrift() {
 
     return () => {
       cancelAnimationFrame(raf)
+      bloomRef.current?.dispose()
       window.removeEventListener('resize', resize)
       window.removeEventListener('keydown', kd)
       window.removeEventListener('keyup', ku)
