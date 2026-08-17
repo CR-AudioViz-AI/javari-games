@@ -272,7 +272,7 @@ function WhackAMoleGame({ onScore, onGameOver }: { onScore: (s: number) => void,
     <div className="p-4 bg-gradient-to-b from-amber-800 to-amber-900 rounded-xl">
       <div className="flex justify-between mb-3 text-white"><span className="font-bold text-xl">🔨 {score}</span><span className="font-bold text-xl">⏱️ {timeLeft}s</span></div>
       <div className="grid grid-cols-3 gap-3 p-4 bg-green-800 rounded-xl">{moles.map((hasMole,i)=>(<button key={i} onClick={()=>whack(i)} className={`w-20 h-20 rounded-full transition-all ${hasMole?'bg-amber-600 scale-110':'bg-amber-900'}`}><span className="text-4xl">{hasMole?'🐹':'🕳️'}</span></button>))}</div>
-      {gameOver&&<div className="mt-4 text-center"><p className="text-2xl text-yellow-400 font-bold">⏰ Time's Up!</p><p className="text-white text-xl">Score: {score}</p><button onClick={()=>window.location.reload()} className="mt-2 px-4 py-2 bg-amber-600 rounded-lg text-white font-bold">Play Again</button></div>}
+      {gameOver&&<div className="mt-4 text-center"><p className="text-2xl text-yellow-400 font-bold">⏰ Time&apos;s Up!</p><p className="text-white text-xl">Score: {score}</p><button onClick={()=>window.location.reload()} className="mt-2 px-4 py-2 bg-amber-600 rounded-lg text-white font-bold">Play Again</button></div>}
     </div>
   )
 }

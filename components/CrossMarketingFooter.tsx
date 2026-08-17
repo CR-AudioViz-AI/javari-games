@@ -20,7 +20,7 @@ export default function CrossMarketingFooter() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-bold text-white mb-4">CR AudioViz AI</h3>
-            <p className="text-gray-400 text-sm mb-4">"Your Story. Our Design" - AI-powered tools for creators and businesses.</p>
+            <p className="text-gray-400 text-sm mb-4">&ldquo;Your Story. Our Design&rdquo; - AI-powered tools for creators and businesses.</p>
             <a href={MAIN_SITE} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 text-sm flex items-center gap-2">
               Visit Main Site <ExternalLink className="w-4 h-4" />
             </a>

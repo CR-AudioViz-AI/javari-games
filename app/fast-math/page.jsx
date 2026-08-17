@@ -371,7 +371,7 @@ export default function FastMath() {
           <Card className="text-center">
             <CardHeader>
               <div className="text-6xl mb-4">🎯</div>
-              <CardTitle className="text-3xl">Time's Up!</CardTitle>
+              <CardTitle className="text-3xl">Time&apos;s Up!</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-blue-600 mb-4">

@@ -23,6 +23,12 @@ interface BrandedHeaderProps {
  * - Auth buttons (Log In/Sign Up or User Name/Log Out)
  * - Credits bar (when logged in)
  */
+/** The balance endpoint returns a free-form tier; the header renders three. */
+function toPlan(tier: string): 'free' | 'pro' | 'business' {
+  if (tier === 'pro' || tier === 'business') return tier;
+  return 'free';
+}
+
 export function BrandedHeader({ appName, appLogo, quickLinks = [] }: BrandedHeaderProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
@@ -36,19 +42,21 @@ export function BrandedHeader({ appName, appLogo, quickLinks = [] }: BrandedHead
 
   const checkAuthStatus = async () => {
     try {
+      // CentralAuth.getSession resolves to the user itself, not a Supabase
+      // session envelope. Reading session.data.user meant this branch could
+      // never be taken and the header never showed a signed-in visitor.
       const session = await CentralServices.Auth.getSession();
-      if (session.success && session.data?.user) {
+      if (session.success && session.data) {
         setIsLoggedIn(true);
         setUser({
-          name: session.data.user.user_metadata?.full_name,
-          email: session.data.user.email,
+          name: session.data.name,
+          email: session.data.email,
         });
-        
-        // Fetch credits
+
         const creditsResult = await CentralServices.Credits.getBalance();
-        if (creditsResult.success) {
-          setCredits(creditsResult.data?.balance || 0);
-          setPlan(creditsResult.data?.plan || 'free');
+        if (creditsResult.success && creditsResult.data) {
+          setCredits(creditsResult.data.balance);
+          setPlan(toPlan(creditsResult.data.tier));
         }
       }
     } catch (error) {

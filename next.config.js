@@ -19,8 +19,12 @@ const nextConfig = {
     ];
   },
 
-  eslint:     { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  // 2026-08-16: both of these were true, and the build was passing over 55 real
+  // TypeScript errors and seven ESLint errors. They are the guards; leaving them
+  // off means the guards do nothing. Anything that fails now is a genuine defect
+  // and belongs fixed, not skipped.
+  eslint:     { ignoreDuringBuilds: false },
+  typescript: { ignoreBuildErrors: false },
   images: {
     unoptimized: true,
     domains: ['kteobfyferrukqeolofj.supabase.co'],

@@ -208,7 +208,7 @@ export default function EmojiCharades() {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">2. Type Your Guess</h4>
-                      <p className="text-gray-600">Enter your answer in the text field. Don't worry about exact spelling!</p>
+                      <p className="text-gray-600">Enter your answer in the text field. Don&apos;t worry about exact spelling!</p>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">3. Build Streaks</h4>

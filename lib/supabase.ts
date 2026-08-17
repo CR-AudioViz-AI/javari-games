@@ -16,9 +16,33 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Re-export admin utilities from central services
 export { isAdmin, shouldChargeCredits, ADMIN_EMAILS, CentralServices } from './central-services';
 
-// Centralized Supabase configuration
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Centralized Supabase configuration.
+//
+// These are read with literal member access, not process.env[name], because
+// Next only inlines NEXT_PUBLIC_* variables it can see written out in full.
+// A dynamic lookup silently yields undefined in the browser bundle.
+//
+// Missing configuration throws here, at import, with a message that names the
+// variable. createClient already threw in that case; it just threw something
+// unhelpful.
+function requireSupabaseUrl(): string {
+  const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!value) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set. Supabase cannot be initialised.');
+  }
+  return value;
+}
+
+function requireSupabaseAnonKey(): string {
+  const value = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!value) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not set. Supabase cannot be initialised.');
+  }
+  return value;
+}
+
+const SUPABASE_URL: string = requireSupabaseUrl();
+const SUPABASE_ANON_KEY: string = requireSupabaseAnonKey();
 
 // Standard client for general use
 export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

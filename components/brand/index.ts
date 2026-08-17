@@ -18,5 +18,6 @@ export { BrandedFooter } from './BrandedFooter';
 export { CreditsBar } from './CreditsBar';
 export { AuthButtons } from './AuthButtons';
 
-// Tailwind config extension
-export { brandConfig as tailwindBrandConfig } from './tailwind.brand.config';
+// No tailwind.brand.config here: the brand tokens live in brand-config.ts and
+// tailwind.config.ts consumes them directly. The old re-export pointed at a
+// file that was never written.

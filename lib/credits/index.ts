@@ -4,7 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabaseAdmin = SUPABASE_SERVICE_KEY ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY) : null;
+// Both halves must be present. A client built from a missing URL fails on
+// first use rather than at construction, which hides the real cause.
+const supabaseAdmin = SUPABASE_URL && SUPABASE_SERVICE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  : null;
 
 export async function checkCredits(userId: string, amount: number): Promise<boolean> {
   if (!supabaseAdmin) return false;

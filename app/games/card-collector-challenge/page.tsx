@@ -456,7 +456,7 @@ export default function CardCollectorChallenge() {
 
                     {gameMode === 'rarity-match' && (
                       <div className="space-y-4">
-                        <div className="text-white text-lg">What's this card's rarity?</div>
+                        <div className="text-white text-lg">What&apos;s this card&apos;s rarity?</div>
                         {gameState === 'playing' && (
                           <div className="grid grid-cols-2 gap-3">
                             {RARITIES.map((rarity) => (
