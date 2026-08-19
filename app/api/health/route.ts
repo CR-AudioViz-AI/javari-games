@@ -36,7 +36,11 @@ export async function GET() {
         auth: { persistSession: false },
         global: { fetch: (u, o) => fetch(u, { ...o, cache: "no-store" }) },
       })
-      const { error } = await db.from("profiles").select("id", { count: "exact", head: true })
+      // 2026-08-19: this probed `profiles`, which RLS correctly DENIES to the anon
+      // role - so the check reported the database unreachable when it was simply
+      // doing its job. A health check must probe something this app is actually
+      // allowed to read, or it reports its own misconfiguration as an outage.
+      const { error } = await db.from("published_games").select("id", { count: "exact", head: true })
       checks.database_reachable = !error
     } catch {
       checks.database_reachable = false
