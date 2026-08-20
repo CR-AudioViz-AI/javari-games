@@ -1,3 +1,11 @@
+// @auth-reviewed: this module exists solely for the OAuth callback, which is
+// the ONE place a cookie client is correct - exchangeCodeForSession WRITES the
+// session and needs cookie set/remove access.
+//
+// Verified 2026-08-20: app/api/auth/callback/route.ts is its only importer.
+// Do not use it anywhere else. Every other cookie client on this platform was
+// READING a session that nothing writes - sessions live in localStorage - which
+// is why dozens of routes answered 401 to everyone, signed in or not.
 // lib/supabase/server.ts
 // javari-games — Supabase server client (platform standard)
 // Matches craudiovizai pattern exactly

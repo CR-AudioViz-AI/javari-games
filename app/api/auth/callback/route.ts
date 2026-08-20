@@ -1,3 +1,11 @@
+// @auth-reviewed: the ONE legitimate cookie client here.
+// exchangeCodeForSession is the operation that WRITES the session and needs
+// cookie set/remove access. Every other cookie client on this platform was
+// READING a session that nothing writes - sessions live in localStorage - which
+// is why dozens of routes answered 401 to everyone.
+//
+// Do not 'fix' this to requireUser(): there is no bearer token yet at this point
+// in the flow. This route is what creates it.
 // app/api/auth/callback/route.ts
 // javari-games — Supabase Auth PKCE callback
 // Saturday, March 14, 2026
