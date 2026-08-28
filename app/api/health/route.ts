@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
 // GET /api/health — does this app actually work?
 //
@@ -19,8 +20,8 @@ export const revalidate = 0
 
 export async function GET() {
   const started = Date.now()
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = supabaseUrl()
+  const key = publishableKey()
 
   const checks: Record<string, boolean> = {
     supabase_url_set: Boolean(url),

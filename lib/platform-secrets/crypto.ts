@@ -13,6 +13,7 @@
 //   v2: JSON{ v:2, enc:"base64", ct:base64 }   (non-secret/public values)
 // Write format: always v1 (authenticated AES-256-GCM).
 import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync, createHash } from "crypto";
+import { supabaseUrl } from "@craudioviz/platform-sdk";
 
 const ALGORITHM = "aes-256-gcm";
 const ITERATIONS = 100_000;
@@ -31,7 +32,7 @@ export interface EncryptedEnvelope {
 function keyMaterial(): string {
   const nas = process.env.NEXTAUTH_SECRET;
   const ref = process.env.SUPABASE_PROJECT_REF
-    ?? (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace("https://", "").split(".")[0];
+    ?? (supabaseUrl()).replace("https://", "").split(".")[0];
   if (!nas) throw new Error("NEXTAUTH_SECRET is required for vault key derivation");
   if (!ref) throw new Error("SUPABASE_PROJECT_REF (or NEXT_PUBLIC_SUPABASE_URL) is required for vault key derivation");
   return `${nas}:${ref}`;
