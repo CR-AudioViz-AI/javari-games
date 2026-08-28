@@ -13,12 +13,13 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { secretKey, publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
 export function createClient() {
   const cookieStore = cookies()
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl(),
+    publishableKey(),
     {
       cookies: {
         get(name: string) { return cookieStore.get(name)?.value },
@@ -36,8 +37,8 @@ export function createClient() {
 export function createServiceClient() {
   const cookieStore = cookies()
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl(),
+    secretKey(),
     {
       cookies: {
         get: (n) => cookieStore.get(n)?.value,

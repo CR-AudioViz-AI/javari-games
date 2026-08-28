@@ -60,7 +60,8 @@
     "recharts": "^2.15.2",
     "vaul": "^1.1.2",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.169.0"
+    "three": "^0.169.0",
+    "@craudioviz/platform-sdk": "git+https://github.com/CR-AudioViz-AI/platform-sdk.git"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

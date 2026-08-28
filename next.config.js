@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 2026-08-29: required for @craudioviz/platform-sdk. The SDK ships raw
+  // TypeScript and Next does not run node_modules through SWC by default, so
+  // any import carrying a `type` re-export fails the build without this.
+  transpilePackages: ["@craudioviz/platform-sdk"],
   async headers() {
     // 2026-08-13: every vertical app served none of these. The core platform
     // has had them since July; the satellites were never given them. Without
