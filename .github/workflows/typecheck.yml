@@ -47,9 +47,22 @@ jobs:
       # The PINNED binary. Bare `npx tsc` resolves TypeScript 6 rather than the
       # pinned v5 and fails on syntax these codebases rely on — that cost core
       # 38-54 minutes per CI run until it was found.
-      # 2026-08-27: exclude test configs. javari-auth carries a
-      # playwright.config.ts and does NOT depend on @playwright/test — a config
-      # for a package that is not installed. Adding the dependency to satisfy a
-      # typecheck would install a test runner nothing runs; excluding the file is
-      # honest about what this repo actually builds.
-      - run: ./node_modules/.bin/tsc --noEmit --excludeFiles playwright.config.ts || ./node_modules/.bin/tsc --noEmit
+      # 2026-08-27: exclude test configs and Deno edge functions via tsconfig,
+      # NOT via --excludeFiles. That flag is ACCEPTED by tsc and does nothing here
+      # — it filters files named on the command line, not the tsconfig `include`
+      # set. I tried it first and the excluded file was still reported.
+      #
+      # Two real cases this covers:
+      #   playwright.config.ts imports @playwright/test in repos that do not
+      #     depend on it — a config for a package that is not installed
+      #   supabase/functions/** are DENO, not Node. They use Deno globals and URL
+      #     imports and will never typecheck under a Next tsconfig.
+      - name: Typecheck (excluding Deno functions and test configs)
+        run: |
+          node -e "
+            const fs=require('fs');
+            const c=JSON.parse(fs.readFileSync('tsconfig.json','utf8').replace(/\/\/.*$/gm,''));
+            c.exclude=[...new Set([...(c.exclude||[]),'node_modules','supabase/functions/**','playwright.config.ts','**/*.test.ts'])];
+            fs.writeFileSync('tsconfig.ci.json',JSON.stringify(c,null,2));
+          "
+          ./node_modules/.bin/tsc --noEmit -p tsconfig.ci.json
