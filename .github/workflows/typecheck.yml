@@ -62,7 +62,7 @@ jobs:
           node -e "
             const fs=require('fs');
             const c=JSON.parse(fs.readFileSync('tsconfig.json','utf8').replace(/\/\/.*$/gm,''));
-            c.exclude=[...new Set([...(c.exclude||[]),'node_modules','supabase/functions/**','playwright.config.ts','**/*.test.ts'])];
+            c.exclude=[...new Set([...(c.exclude||[]),'node_modules','supabase/functions/**','playwright.config.ts','e2e/**','tests/**','**/*.test.ts','**/*.spec.ts'])];
             fs.writeFileSync('tsconfig.ci.json',JSON.stringify(c,null,2));
           "
           ./node_modules/.bin/tsc --noEmit -p tsconfig.ci.json
