@@ -40,20 +40,31 @@ export async function registerNode(): Promise<void> {
   }
 
   // NOT AWAITED. The server comes up now.
-  void installEnvShim()
-    .then((r) => {
-      console.log(
-        JSON.stringify({
-          level: "INFO",
-          event: "ENV_HYDRATED",
-          hydrated: r.hydrated,
-          skipped: r.skipped,
-        }),
-      );
-    })
-    .catch((e: unknown) => {
-      // Logged, never thrown. An unhandled rejection at boot is the same outage
-      // by a different route.
+    // 2026-08-31: AWAITED, BOUNDED. The fire-and-forget version raced:
+    //
+    //   boot starts -> hydration begins -> server ACCEPTS REQUESTS IMMEDIATELY ->
+    //   a request reads process.env.SOME_KEY -> undefined -> 401 from the provider
+    //
+    // With a Vercel copy present the value is there from the first millisecond and
+    // the race is invisible. Remove the copy and every COLD START hits the window —
+    // on serverless every cold start is a fresh process, so it recurs constantly.
+    // Proven on core: deleting 54 verified-identical vars turned /api/health from
+    // groq:ok to groq:error:401 until this was fixed.
+    //
+    // Bounded, because an unbounded await here is a refusal to boot. A vault that
+    // will not answer costs HYDRATION_TIMEOUT_MS and the app then runs on whatever
+    // Vercel still holds — degrading to the previous configuration is acceptable.
+    const HYDRATION_TIMEOUT_MS = 4000;
+    const hydrationStarted = Date.now();
+    let outcome: { hydrated: number; skipped: number } | null = null;
+    try {
+      outcome = (await Promise.race([
+        installEnvShim(),
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), HYDRATION_TIMEOUT_MS),
+        ),
+      ])) as { hydrated: number; skipped: number } | null;
+    } catch (e) {
       console.warn(
         JSON.stringify({
           level: "WARN",
@@ -61,5 +72,13 @@ export async function registerNode(): Promise<void> {
           message: e instanceof Error ? e.message : String(e),
         }),
       );
-    });
+    }
+    console.log(
+      JSON.stringify({
+        level: outcome ? "INFO" : "WARN",
+        event: outcome ? "ENV_HYDRATED" : "ENV_HYDRATION_TIMEOUT",
+        hydrated: outcome?.hydrated ?? 0,
+        ms: Date.now() - hydrationStarted,
+      }),
+    );
 }
