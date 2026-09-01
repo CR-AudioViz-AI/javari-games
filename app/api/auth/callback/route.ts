@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get('next') ?? '/games'
 
   if (code) {
-    const supabase = createClient()
+    // 2026-09-01: awaited. createClient reads cookies(), which Next 15 made async, so
+    // the function is now async and returns a Promise. Without the await this is the
+    // OAuth code exchange calling .auth on a Promise — every sign-in would fail.
+    const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) return NextResponse.redirect(`${origin}${next}`)
     console.error('[games/auth/callback]', error.message)
