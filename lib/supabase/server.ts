@@ -34,14 +34,18 @@ export async function createClient() {
   )
 }
 
-export function createServiceClient() {
+// 2026-09-01: async, because it awaits cookies(). My previous edit added the await
+// and only made the FIRST exported function async — this one kept the await without
+// the keyword, which is a syntax error rather than a subtle bug, and the build
+// caught it immediately.
+export async function createServiceClient() {
   const cookieStore = (await cookies())
   return createServerClient(
     supabaseUrl(),
     secretKey(),
     {
       cookies: {
-        get: (n) => cookieStore.get(n)?.value,
+        get: (n: string) => cookieStore.get(n)?.value,
         set: () => {},
         remove: () => {},
       },
