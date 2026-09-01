@@ -54,8 +54,14 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        // 2026-09-01: react-day-picker v9 replaced IconLeft/IconRight with a single
+        // Chevron that receives an orientation. Same fix as javari-logo.
+        Chevron: ({ orientation, ...props }) =>
+          orientation === 'left' ? (
+            <ChevronLeft className="h-4 w-4" {...props} />
+          ) : (
+            <ChevronRight className="h-4 w-4" {...props} />
+          ),
       }}
       {...props}
     />
