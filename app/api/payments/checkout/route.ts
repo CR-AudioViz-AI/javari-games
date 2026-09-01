@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pricing from '@/content/pricing.json';
-function inMonths(m){ const d=new Date(); d.setMonth(d.getMonth()+m); return d.toISOString(); }
-function inYears(y){ const d=new Date(); d.setFullYear(d.getFullYear()+y); return d.toISOString(); }
+function inMonths(m: number){ const d=new Date(); d.setMonth(d.getMonth()+m); return d.toISOString(); }
+function inYears(y: number){ const d=new Date(); d.setFullYear(d.getFullYear()+y); return d.toISOString(); }
 export async function POST(req: NextRequest){
   const body=await req.json().catch(()=>({})); const id=body.productId||'pro_monthly';
   const plan=pricing.plans.find(p=>p.id===id); const top=pricing.topups.find(t=>t.id===id);
