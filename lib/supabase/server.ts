@@ -15,8 +15,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { secretKey, publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = (await cookies())
   return createServerClient(
     supabaseUrl(),
     publishableKey(),
@@ -35,7 +35,7 @@ export function createClient() {
 }
 
 export function createServiceClient() {
-  const cookieStore = cookies()
+  const cookieStore = (await cookies())
   return createServerClient(
     supabaseUrl(),
     secretKey(),
