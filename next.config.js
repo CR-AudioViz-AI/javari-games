@@ -14,6 +14,25 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
+            // 2026-09-02: added after an ecosystem sweep found 58 of 60 live sites
+            // with no CSP and weak HSTS. The other four headers here have been right
+            // since August; these two were never added.
+            //
+            // HSTS is enforced immediately - it only instructs the browser to refuse
+            // plaintext, so there is nothing for it to break.
+            //
+            // CSP ships REPORT-ONLY first, deliberately. A policy that blocks a script
+            // the app actually needs takes the app down, and 48 apps received this in
+            // one pass. Report-Only produces the same violation reports with none of
+            // the blocking, so the policy is corrected from evidence rather than from
+            // a guess about what each app loads. It graduates to enforcing once the
+            // reports are quiet.
+            //
+            // Backticks, not quotes: the policy contains 'self' and a single-quoted
+            // JS string cannot hold it. The first version of this patch produced
+            // 48 syntactically invalid configs, caught by parsing one before pushing.
+            { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+            { key: 'Content-Security-Policy-Report-Only', value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.paypal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.paypal.com; frame-src 'self' https://js.stripe.com https://*.paypal.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests` },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
