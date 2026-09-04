@@ -1,33 +1,58 @@
-// lib/supabase/client.ts — the browser Supabase client
+// lib/supabase/client.ts
+// SINGLE shared Supabase browser client — module-level singleton.
 //
-// 2026-08-18: replaced createBrowserClient from @supabase/ssr, which is
-// forbidden by the auth architecture locked 2026-07-15. That client stores the
-// session in cookies; a Discord session with provider tokens exceeds 4KB and
-// gets chunked across three, and racing client instances clobber the pieces, so
-// the session dies. It is exactly what broke javari-spirits' collection feature,
-// where the shelf could never hold a signed-in user.
+// 2026-09-04: replaced the @supabase/ssr cookie browser client, which is
+// FORBIDDEN on this platform.
 //
-// Module-level singleton, raw supabase-js, localStorage, PKCE. Stable across
-// renders by construction, so it is safe as a hook dependency.
+// Why, and it was learned the hard way: a Discord session carrying provider
+// tokens exceeds 4KB and chunks into three cookies. Multiple client instances
+// then race and clobber chunk .1, and the session silently becomes unreadable.
+// The symptom is a user who appears signed in and is not, which is close to
+// impossible to reproduce on demand.
 //
-// CR AudioViz AI · EIN 39-3646201 · August 2026
-import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
-import { publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
+// localStorage holds the session instead. PKCE plus detectSessionInUrl handles
+// every OAuth code exchange, and the module-level singleton means there is only
+// ever one instance to race.
+//
+// This file is a copy of the core platform's canonical client, self-contained
+// because this repository has no lib/supabase/keys.ts. The two NEXT_PUBLIC names
+// are spelled out literally: Next only inlines process.env.NEXT_PUBLIC_* into the
+// browser bundle when the text matches exactly, so a computed key name silently
+// becomes undefined at runtime.
+//
+// CR AudioViz AI, LLC · EIN 39-3646201
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js';
 
-let browserClient: SupabaseClient | null = null
+let _client: SupabaseClient | null = null;
 
-export function createClient(): SupabaseClient {
-  if (browserClient) return browserClient
-  const url = supabaseUrl()
-  const key = publishableKey()
-  if (!url) throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set')
-  if (!key) throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not set')
-  browserClient = createSupabaseClient(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
-  })
-  return browserClient
+function url(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 }
 
-/** Historical alias. Same singleton - NOT the @supabase/ssr cookie client. */
-export const createBrowserClient = createClient
-export default createClient
+function key(): string {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    ''
+  );
+}
+
+export function createClient(): SupabaseClient {
+  if (_client) return _client;
+  _client = createSupabaseClient(url(), key(), {
+    auth: {
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+    },
+  });
+  return _client;
+}
+
+/** Kept so existing imports keep working. Same singleton. */
+export const createBrowserClient = createClient;
+
+export const supabase = createClient();
+export default createClient;
